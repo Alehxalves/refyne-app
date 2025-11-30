@@ -15,7 +15,10 @@ export function CoreProvider({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
       localization={ptBR}
-      appearance={{ theme: isDark ? dark : experimental__simple }}
+      appearance={{
+        theme: isDark ? dark : experimental__simple,
+        cssLayerName: "clerk",
+      }}
     >
       <SupabaseProvider>
         <QueryClientProvider client={queryClient}>
