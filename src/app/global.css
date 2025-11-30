@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+.EmojiPickerReact {
+  border: none !important;
+  box-shadow: none;
+}

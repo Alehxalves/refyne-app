@@ -1,9 +1,10 @@
 import { type Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { Provider } from "@/components/ui/provider";
 import { CoreProvider } from "./_components/core-provider";
 import { Toaster } from "@/components/ui/toaster";
-import navIcon from "@/assets/navIcon.png";
+import refyneLogo from "@/assets/refyne-logo.png";
+import "./global.css";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -11,10 +12,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Refine App",
+  title: "Refyne",
   description: "Created by alehxalves",
   icons: {
-    icon: [navIcon.src],
+    icon: [refyneLogo.src],
   },
 };
 
