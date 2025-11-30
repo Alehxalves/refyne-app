@@ -5,7 +5,7 @@ import { commentService } from "@/lib/supabase/services/comments.service";
 import { useSupabase } from "@/lib/supabase/SupabaseProvider";
 import { useUser } from "@clerk/nextjs";
 
-export function useComments(storieId: string) {
+export function useComments(storyId: string) {
   const { user } = useUser();
   const { supabase } = useSupabase();
   const queryClient = useQueryClient();
@@ -16,22 +16,23 @@ export function useComments(storieId: string) {
     isFetching,
     error,
   } = useQuery({
-    queryKey: ["comments", storieId],
-    enabled: !!user && !!storieId,
+    queryKey: ["comments", storyId],
+    enabled: !!user && !!storyId,
     queryFn: async () =>
-      commentService.getCommentsByStorieId(supabase!, storieId),
+      commentService.getCommentsByStoryId(supabase!, storyId),
   });
 
   const createCommentMutation = useMutation({
     mutationFn: async (commentData: {
       story_id: string;
+      avatar?: string;
       context: string;
       message: string;
     }) => commentService.createComment(supabase!, commentData),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["comments", storieId],
+        queryKey: ["comments", storyId],
       });
     },
   });
@@ -42,7 +43,7 @@ export function useComments(storieId: string) {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["comments", storieId],
+        queryKey: ["comments", storyId],
       });
     },
   });
@@ -60,6 +61,6 @@ export function useComments(storieId: string) {
     isDeleting: deleteCommentMutation.isPending,
 
     refetch: () =>
-      queryClient.invalidateQueries({ queryKey: ["comments", storieId] }),
+      queryClient.invalidateQueries({ queryKey: ["comments", storyId] }),
   };
 }

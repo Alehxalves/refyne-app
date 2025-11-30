@@ -27,7 +27,7 @@ export function SidebarMenu({ expanded }: SidebarMenuProps) {
   return (
     <Box
       bg={{ base: "gray.50", _dark: "gray.900" }}
-      h={`calc(100vh - 2.8rem)`}
+      h={`calc(100vh - 3.4rem)`}
       boxShadow={{ base: "md", _dark: "none" }}
       w={isExpanded ? "250px" : "70px"}
       minW={isExpanded ? "250px" : "70px"}

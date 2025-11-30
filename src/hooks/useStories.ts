@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { storieService } from "@/lib/supabase/services/storie.service";
+import { storyService } from "@/lib/supabase/services/story.service";
 import { useSupabase } from "@/lib/supabase/SupabaseProvider";
 import { useUser } from "@clerk/nextjs";
-import { Storie } from "@/lib/supabase/models";
+import { Story } from "@/lib/supabase/models";
 
 export function useStories(boardId: string) {
   const { user } = useUser();
@@ -17,7 +17,7 @@ export function useStories(boardId: string) {
   } = useQuery({
     queryKey: ["stories", boardId],
     enabled: !!user && !!boardId,
-    queryFn: async () => storieService.getStoriesByBoardId(supabase!, boardId),
+    queryFn: async () => storyService.getStoriesByBoardId(supabase!, boardId),
   });
 
   const createStoryMutation = useMutation({
@@ -25,7 +25,8 @@ export function useStories(boardId: string) {
       board_id: string;
       title: string;
       description: string;
-    }) => storieService.createStorie(supabase!, storyData),
+      story_group_id?: string | null;
+    }) => storyService.createStory(supabase!, storyData),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -45,58 +46,67 @@ export function useStories(boardId: string) {
   };
 }
 
-export function useStorie(storieId: string) {
+export function useStory(storyId: string) {
   const { user } = useUser();
   const { supabase } = useSupabase();
   const queryClient = useQueryClient();
 
   const {
-    data: storie,
+    data: story,
     isLoading,
     isFetching,
     error,
   } = useQuery({
-    queryKey: ["storie", storieId],
-    enabled: !!user && !!storieId,
-    queryFn: async () => storieService.getStorieById(supabase!, storieId),
+    queryKey: ["story", storyId],
+    enabled: !!user && !!storyId,
+    queryFn: async () => storyService.getStoryById(supabase!, storyId),
   });
 
-  const updateStorieMutation = useMutation({
-    mutationFn: async (updates: Partial<Storie>) =>
-      storieService.updateStorie(supabase!, storieId, updates),
+  const updateStoryMutation = useMutation({
+    mutationFn: async (updates: Partial<Story>) =>
+      storyService.updateStory(supabase!, storyId, updates),
 
     onSuccess: (updated) => {
-      queryClient.setQueryData(["storie", storieId], updated);
+      queryClient.setQueryData(["story", storyId], updated);
 
-      queryClient.setQueryData<Storie[]>(
+      queryClient.setQueryData<Story[]>(
         ["stories", updated.board_id],
         (old) =>
-          old?.map((s) => (s.id === updated.id ? (updated as Storie) : s)) ??
-          old
+          old?.map((s) => (s.id === updated.id ? (updated as Story) : s)) ?? old
       );
     },
   });
 
-  const deleteStorieMutation = useMutation({
-    mutationFn: async () => storieService.deleteStorie(supabase!, storieId),
+  const archiveStoryMutation = useMutation({
+    mutationFn: async () => storyService.archiveStory(supabase!, storyId),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storie", storieId] });
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
+    },
+  });
+
+  const deleteStoryMutation = useMutation({
+    mutationFn: async () => storyService.deleteStory(supabase!, storyId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] });
       queryClient.invalidateQueries({ queryKey: ["stories"] });
     },
   });
 
   return {
-    storie,
+    story,
     isLoading,
     isFetching,
     error,
 
-    updateStorie: updateStorieMutation.mutateAsync,
-    isUpdating: updateStorieMutation.isPending,
-    deleteStorie: deleteStorieMutation.mutateAsync,
+    updateStory: updateStoryMutation.mutateAsync,
+    isUpdating: updateStoryMutation.isPending,
+    archiveStory: archiveStoryMutation.mutateAsync,
+    deleteStory: deleteStoryMutation.mutateAsync,
 
     refetch: () =>
-      queryClient.invalidateQueries({ queryKey: ["storie", storieId] }),
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] }),
   };
 }

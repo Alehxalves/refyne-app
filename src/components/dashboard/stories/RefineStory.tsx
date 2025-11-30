@@ -1,9 +1,10 @@
 "use client";
 
 import { useCheckLists } from "@/hooks/useChecklists";
-import { useStorie } from "@/hooks/useStories";
+import { useStory } from "@/hooks/useStories";
 import { useComments } from "@/hooks/useComments";
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
@@ -17,43 +18,51 @@ import {
   Stack,
   Text,
   Textarea,
+  HStack,
+  IconButton,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { goodStorieTip } from "./tips/storie-tips";
+import { goodStoryTip } from "./tips/story-tips";
 import { investTip } from "./tips/dor-tips";
-import { Storie } from "@/lib/supabase/models";
+import { Story } from "@/lib/supabase/models";
+import { useUser } from "@clerk/nextjs";
+import { Trash } from "lucide-react";
+import { EmojiPickerDialog } from "@/components/utils/EmojiPickerDialog";
 
-const StorieSchema = z.object({
+const StorySchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string().min(1, "A descrição é obrigatória"),
 });
 
-type StorieValues = z.infer<typeof StorieSchema>;
+type StoryValues = z.infer<typeof StorySchema>;
 
-interface RefineStorieProps {
-  storieId: string;
+interface RefineStoryProps {
+  storyId: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function RefineStorie({
-  storieId,
+const MAX_COMMENT_LENGTH = 255;
+
+export default function RefineStory({
+  storyId,
   isOpen,
   onClose,
-}: RefineStorieProps) {
-  const { storie, updateStorie } = useStorie(storieId);
-  const { checkLists, error, updateCheckItem } = useCheckLists(storieId);
+}: RefineStoryProps) {
+  const { user } = useUser();
+  const { story, updateStory } = useStory(storyId);
+  const { checkLists, error, updateCheckItem } = useCheckLists(storyId);
 
-  // 🔹 comentários da storie
   const {
     comments,
     isLoading: isLoadingComments,
     isCreating,
     createComment,
-  } = useComments(storieId);
+    deleteComment,
+  } = useComments(storyId);
 
   const [newComment, setNewComment] = useState("");
 
@@ -64,8 +73,8 @@ export default function RefineStorie({
     reset,
     trigger,
     getValues,
-  } = useForm<StorieValues>({
-    resolver: zodResolver(StorieSchema),
+  } = useForm<StoryValues>({
+    resolver: zodResolver(StorySchema),
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -74,25 +83,25 @@ export default function RefineStorie({
   });
 
   useEffect(() => {
-    if (storie && isOpen) {
+    if (story && isOpen) {
       reset({
-        title: storie.title ?? "",
-        description: storie.description ?? "",
+        title: story.title ?? "",
+        description: story.description ?? "",
       });
     }
-  }, [storie, isOpen, reset]);
+  }, [story, isOpen, reset]);
 
   const investChecklist = checkLists?.find((cl) => cl.type === "INVEST");
 
-  async function handleBlurField(fieldName: keyof StorieValues) {
+  async function handleBlurField(fieldName: keyof StoryValues) {
     const isValid = await trigger(fieldName);
-    if (!isValid || !storie) return;
+    if (!isValid || !story) return;
 
     const value = getValues(fieldName);
-    if (value === (storie as any)[fieldName]) return;
+    if (value === (story as Story)[fieldName]) return;
 
     try {
-      await updateStorie({ [fieldName]: value } as Partial<Storie>);
+      await updateStory({ [fieldName]: value } as Partial<Story>);
     } catch (err) {
       console.error("Erro ao atualizar história:", err);
     }
@@ -104,7 +113,8 @@ export default function RefineStorie({
 
     try {
       await createComment({
-        story_id: storieId,
+        story_id: storyId,
+        avatar: user?.imageUrl || undefined,
         context: "INVEST",
         message: trimmed,
       });
@@ -116,7 +126,7 @@ export default function RefineStorie({
 
   return (
     <Dialog.Root
-      size="lg"
+      size={{ base: "sm", sm: "lg", md: "xl", lg: "xl" }}
       open={isOpen === true}
       onOpenChange={(details) => {
         if (!details.open) {
@@ -139,10 +149,8 @@ export default function RefineStorie({
                 </Text>
               )}
             </Dialog.Header>
-
             <Dialog.Body>
               <Stack gap="4" align="flex-start" flexDir="row" flexWrap="wrap">
-                {/* TÍTULO */}
                 <Field.Root invalid={!!errors.title} width="100%">
                   <Field.Label
                     fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
@@ -167,8 +175,6 @@ export default function RefineStorie({
                   />
                   <Field.ErrorText>{errors.title?.message}</Field.ErrorText>
                 </Field.Root>
-
-                {/* DESCRIÇÃO */}
                 <Field.Root invalid={!!errors.description} width="100%">
                   <Field.Label
                     fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
@@ -197,12 +203,8 @@ export default function RefineStorie({
                     {errors.description?.message}
                   </Field.ErrorText>
                 </Field.Root>
-
-                {goodStorieTip()}
-
+                {goodStoryTip()}
                 <Separator w="100%" />
-
-                {/* CHECKLIST INVEST */}
                 {investChecklist && (
                   <Box width="100%">
                     <Text
@@ -225,7 +227,9 @@ export default function RefineStorie({
                           }}
                         >
                           <Checkbox.HiddenInput />
-                          <Checkbox.Control>
+                          <Checkbox.Control
+                            bg={item.is_checked ? "green.500" : undefined}
+                          >
                             <Checkbox.Indicator />
                           </Checkbox.Control>
                           <Checkbox.Label
@@ -238,10 +242,7 @@ export default function RefineStorie({
                     </Stack>
                   </Box>
                 )}
-
                 {investTip()}
-
-                {/* 🔽 SEÇÃO DE COMENTÁRIOS */}
                 <Box w="100%" mt="4">
                   <Text
                     fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
@@ -250,18 +251,38 @@ export default function RefineStorie({
                   >
                     Comentários sobre o refinamento
                   </Text>
-
-                  {/* Criar comentário */}
                   <Stack gap="2" mb="3">
                     <Textarea
                       fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
                       borderColor={{ base: "gray.200", _dark: "gray.500" }}
                       placeholder="Registre dúvidas, sugestões ou decisões sobre essa história..."
                       value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value.slice(
+                          0,
+                          MAX_COMMENT_LENGTH
+                        );
+                        setNewComment(value);
+                      }}
                       minH="80px"
                     />
-                    <Box display="flex" justifyContent="flex-end">
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <HStack gap="2" align="center">
+                        <EmojiPickerDialog
+                          onSelectEmoji={(emoji) => {
+                            setNewComment((prev) =>
+                              (prev + emoji).slice(0, MAX_COMMENT_LENGTH)
+                            );
+                          }}
+                        />
+                        <Text fontSize="xs" color="gray.500">
+                          {newComment.length}/{MAX_COMMENT_LENGTH}
+                        </Text>
+                      </HStack>
                       <Button
                         size="xs"
                         onClick={handleAddComment}
@@ -272,8 +293,6 @@ export default function RefineStorie({
                       </Button>
                     </Box>
                   </Stack>
-
-                  {/* Lista de comentários */}
                   <Stack
                     gap="2"
                     maxH="200px"
@@ -304,11 +323,39 @@ export default function RefineStorie({
                             _dark: "gray.700",
                           }}
                         >
-                          <Text fontSize="xs" color="gray.500" mb="1">
-                            {comment.context || "Comentário"} •{" "}
-                            {new Date(comment.created_at).toLocaleString()}
-                          </Text>
-                          <Text fontSize="sm">{comment.message}</Text>
+                          <HStack align="flex-start" gap="4">
+                            <Avatar.Root size="sm">
+                              <Avatar.Fallback
+                                name={user?.fullName || "Autor"}
+                              />
+                              <Avatar.Image src={comment.avatar || undefined} />
+                            </Avatar.Root>
+                            <Box flex="1">
+                              <HStack
+                                justify="space-between"
+                                align="center"
+                                mb="1"
+                              >
+                                <Text fontSize="xs" color="gray.500">
+                                  {comment.context || "Comentário"} •{" "}
+                                  {new Date(
+                                    comment.created_at
+                                  ).toLocaleString()}
+                                </Text>
+
+                                <IconButton
+                                  title="Excluir comentário"
+                                  size="xs"
+                                  variant="ghost"
+                                  aria-label="Excluir comentário"
+                                  onClick={() => deleteComment(comment.id)}
+                                >
+                                  <Trash size={12} color="#EF4444" />
+                                </IconButton>
+                              </HStack>
+                              <Text fontSize="sm">{comment.message}</Text>
+                            </Box>
+                          </HStack>
                         </Box>
                       ))
                     )}
@@ -316,7 +363,6 @@ export default function RefineStorie({
                 </Box>
               </Stack>
             </Dialog.Body>
-
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />
             </Dialog.CloseTrigger>

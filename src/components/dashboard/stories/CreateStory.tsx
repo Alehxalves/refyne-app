@@ -16,26 +16,26 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useParams } from "next/navigation";
 import { useStories } from "@/hooks/useStories";
-import { goodStorieTip } from "./tips/storie-tips";
+import { goodStoryTip } from "./tips/story-tips";
 
-const StorieSchema = z.object({
+const StorySchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string().min(1, "A descrição é obrigatória"),
 });
 
-type StorieValues = z.infer<typeof StorieSchema>;
+type StoryValues = z.infer<typeof StorySchema>;
 
-interface CreateStorieProps {
+interface CreateStoryProps {
   isOpen: boolean;
   onClose: () => void;
   shouldRefetch?: (value: boolean) => void;
 }
 
-export default function CreateStorie({
+export default function CreateStory({
   isOpen,
   onClose,
   shouldRefetch,
-}: CreateStorieProps) {
+}: CreateStoryProps) {
   const params = useParams();
   const boardId = params.id as string;
   const { createStory, isLoading } = useStories(boardId);
@@ -45,8 +45,8 @@ export default function CreateStorie({
     control,
     clearErrors,
     reset,
-  } = useForm<StorieValues>({
-    resolver: zodResolver(StorieSchema),
+  } = useForm<StoryValues>({
+    resolver: zodResolver(StorySchema),
     mode: "onSubmit",
     defaultValues: {
       title: "",
@@ -54,7 +54,7 @@ export default function CreateStorie({
     },
   });
 
-  const onSubmit = handleSubmit(async function handleSend(data: StorieValues) {
+  const onSubmit = handleSubmit(async function handleSend(data: StoryValues) {
     try {
       await createStory({
         board_id: boardId,
@@ -128,7 +128,7 @@ export default function CreateStorie({
                     </Field.ErrorText>
                   </Field.Root>
 
-                  {goodStorieTip()}
+                  {goodStoryTip()}
                 </Stack>
               </Dialog.Body>
 

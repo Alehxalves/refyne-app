@@ -1,7 +1,7 @@
 export interface Board {
   id: string;
   user_id: string;
-  title: string;
+  title?: string;
   description?: string;
   color?: string;
   text_color?: string;
@@ -10,15 +10,27 @@ export interface Board {
 }
 
 export type BoardWithStories = Board & {
-  stories: Storie[];
+  stories: Story[];
 };
 
-export interface Storie {
+export interface Story {
   id: string;
   board_id: string;
   title: string;
   description: string;
   default_priority?: "LOW" | "MEDIUM" | "HIGH";
+  sort_order: number;
+  archived?: boolean;
+  story_group_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StoryGroup {
+  id: string;
+  board_id: string;
+  title: string;
+  color?: string;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -26,7 +38,7 @@ export interface Storie {
 
 export interface CheckList {
   id: string;
-  storie_id: string;
+  story_id: string;
   type: string;
   title: string;
   created_at: string;
@@ -63,6 +75,7 @@ export interface Priority {
 export interface Comment {
   id: string;
   story_id: string;
+  avatar?: string;
   context: string;
   message: string;
   created_at: string;

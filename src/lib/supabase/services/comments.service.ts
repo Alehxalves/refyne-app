@@ -31,17 +31,17 @@ export const commentService = {
     return (data as Comment) ?? null;
   },
 
-  async getCommentsByStorieId(
+  async getCommentsByStoryId(
     supabase: SupabaseClient,
-    storieId: string
+    storyId: string
   ): Promise<Comment[]> {
     const { data, error } = await supabase
       .from("comments")
       .select("*")
-      .eq("story_id", storieId)
-      .order("created_at", { ascending: true });
+      .eq("story_id", storyId)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data as Comment[]) || [];
+    return (data as Comment[]) ?? [];
   },
 };

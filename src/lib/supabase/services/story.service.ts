@@ -1,17 +1,23 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Storie } from "../models";
+import { Story } from "../models";
 
-export const storieService = {
-  async createStorie(
+export const storyService = {
+  async createStory(
     supabase: SupabaseClient,
-    storie: Omit<
-      Storie,
-      "id" | "created_at" | "updated_at" | "default_priority" | "sort_order"
+    story: Omit<
+      Story,
+      | "id"
+      | "created_at"
+      | "updated_at"
+      | "default_priority"
+      | "sort_order"
+      | "story_group_id"
+      | "archived"
     >
-  ): Promise<Storie> {
+  ): Promise<Story> {
     const { data: createdStory, error } = await supabase
       .from("stories")
-      .insert(storie)
+      .insert(story)
       .select()
       .single();
 
@@ -20,7 +26,7 @@ export const storieService = {
     const { data: checklist, error: checklistError } = await supabase
       .from("check_lists")
       .insert({
-        storie_id: createdStory.id,
+        story_id: createdStory.id,
         type: "INVEST",
         title: "Checklist INVEST",
       })
@@ -53,42 +59,42 @@ export const storieService = {
 
     return createdStory;
   },
-  async updateStorie(
+  async updateStory(
     supabase: SupabaseClient,
-    storieId: string,
-    updates: Partial<Storie>
-  ): Promise<Storie> {
+    storyId: string,
+    updates: Partial<Story>
+  ): Promise<Story> {
     const { data, error } = await supabase
       .from("stories")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", storieId)
+      .eq("id", storyId)
       .select()
       .single();
 
     if (error) throw error;
     return data;
   },
-
-  async deleteStorie(
-    supabase: SupabaseClient,
-    storieId: string
-  ): Promise<void> {
+  async archiveStory(supabase: SupabaseClient, storyId: string): Promise<void> {
     const { error } = await supabase
       .from("stories")
-      .delete()
-      .eq("id", storieId);
+      .update({ archived: true, updated_at: new Date().toISOString() })
+      .eq("id", storyId);
 
     if (error) throw error;
   },
+  async deleteStory(supabase: SupabaseClient, storyId: string): Promise<void> {
+    const { error } = await supabase.from("stories").delete().eq("id", storyId);
 
-  async getStorieById(
+    if (error) throw error;
+  },
+  async getStoryById(
     supabase: SupabaseClient,
-    storieId: string
-  ): Promise<Storie> {
+    storyId: string
+  ): Promise<Story> {
     const { data, error } = await supabase
       .from("stories")
       .select("*")
-      .eq("id", storieId)
+      .eq("id", storyId)
       .single();
 
     if (error) throw error;
@@ -98,11 +104,12 @@ export const storieService = {
   async getStoriesByBoardId(
     supabase: SupabaseClient,
     boardId: string
-  ): Promise<Storie[]> {
+  ): Promise<Story[]> {
     const { data, error } = await supabase
       .from("stories")
       .select("*")
       .eq("board_id", boardId)
+      .eq("archived", false)
       .order("sort_order", { ascending: true });
 
     if (error) throw error;

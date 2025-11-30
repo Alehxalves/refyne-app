@@ -57,7 +57,7 @@ export default function BoardLayout({
               : "0px"
           }
           transition="margin-left 0.3s ease-in-out"
-          height={`calc(100vh - 64px)`}
+          height="calc(100vh - 64px)"
           overflowY="auto"
         >
           {children}

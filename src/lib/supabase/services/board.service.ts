@@ -37,7 +37,7 @@ export const boardService = {
       .from("boards")
       .select("*")
       .eq("user_id", user_id)
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -52,28 +52,5 @@ export const boardService = {
 
     if (error) throw error;
     return data;
-  },
-};
-
-export const boardDataService = {
-  async createBoardWithDefaultLists(
-    supabase: SupabaseClient,
-    boardData: {
-      user_id: string;
-      title: string;
-      description?: string;
-      color?: string;
-      text_color?: string;
-    }
-  ) {
-    const board = await boardService.createBoard(supabase, {
-      user_id: boardData.user_id,
-      title: boardData.title,
-      description: boardData.description,
-      color: boardData.color ?? "#3B82F6",
-      text_color: boardData.text_color ?? "#FAFAFA",
-    });
-
-    return board;
   },
 };

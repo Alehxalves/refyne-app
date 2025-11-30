@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  boardDataService,
-  boardService,
-} from "@/lib/supabase/services/board.service";
+import { boardService } from "@/lib/supabase/services/board.service";
 import { Board } from "@/lib/supabase/models";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
@@ -47,13 +44,10 @@ export function useBoards() {
 
     setIsLoading(true);
     try {
-      const newBoard = await boardDataService.createBoardWithDefaultLists(
-        supabase!,
-        {
-          ...boardData,
-          user_id: user.id as string,
-        }
-      );
+      const newBoard = await boardService.createBoard(supabase!, {
+        ...boardData,
+        user_id: user.id as string,
+      });
 
       setBoards((prevBoards) => [newBoard, ...prevBoards]);
     } catch (error) {

@@ -19,33 +19,29 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Lightbulb } from "lucide-react";
-import { useStorie } from "@/hooks/useStories";
+import { useStory } from "@/hooks/useStories";
 
-const StorieSchema = z.object({
+const StorySchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string().min(1, "A descrição é obrigatória"),
 });
 
-type StorieValues = z.infer<typeof StorieSchema>;
+type StoryValues = z.infer<typeof StorySchema>;
 
-interface UpdateStorieProps {
-  storieId: string;
+interface UpdateStoryProps {
+  storyId: string;
   isOpen: boolean;
   onClose: () => void;
   shouldRefetch?: (value: boolean) => void;
 }
 
-export default function UpdateStorie({
-  storieId,
+export default function UpdateStory({
+  storyId,
   isOpen,
   onClose,
   shouldRefetch,
-}: UpdateStorieProps) {
-  const {
-    storie,
-    updateStorie,
-    isLoading: isLoadingStorie,
-  } = useStorie(storieId);
+}: UpdateStoryProps) {
+  const { story, updateStory, isLoading: isLoadingStory } = useStory(storyId);
 
   const {
     handleSubmit,
@@ -53,8 +49,8 @@ export default function UpdateStorie({
     control,
     clearErrors,
     reset,
-  } = useForm<StorieValues>({
-    resolver: zodResolver(StorieSchema),
+  } = useForm<StoryValues>({
+    resolver: zodResolver(StorySchema),
     mode: "onSubmit",
     defaultValues: {
       title: "",
@@ -63,21 +59,21 @@ export default function UpdateStorie({
   });
 
   useEffect(() => {
-    if (storie && isOpen) {
+    if (story && isOpen) {
       reset({
-        title: storie.title ?? "",
-        description: storie.description ?? "",
+        title: story.title ?? "",
+        description: story.description ?? "",
       });
     }
-  }, [storie, isOpen, reset]);
+  }, [story, isOpen, reset]);
 
-  if (isLoadingStorie) {
+  if (isLoadingStory) {
     return null;
   }
 
-  const onSubmit = handleSubmit(async function handleSend(data: StorieValues) {
+  const onSubmit = handleSubmit(async function handleSend(data: StoryValues) {
     try {
-      await updateStorie({ title: data.title, description: data.description });
+      await updateStory({ title: data.title, description: data.description });
       shouldRefetch?.(true);
       onClose();
     } catch (error) {
@@ -207,8 +203,8 @@ export default function UpdateStorie({
                 <Button
                   size="sm"
                   type="submit"
-                  loading={isLoadingStorie}
-                  disabled={isLoadingStorie}
+                  loading={isLoadingStory}
+                  disabled={isLoadingStory}
                 >
                   Atualizar história
                 </Button>

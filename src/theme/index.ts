@@ -15,16 +15,16 @@ const config = defineConfig({
         mono: { value: "monospace" },
       },
       fontSizes: {
-        xs: { value: "0.90rem" }, // era sm
-        sm: { value: "1.00rem" }, // era md
-        md: { value: "1.125rem" }, // era lg
-        lg: { value: "1.25rem" }, // era xl
-        xl: { value: "1.50rem" }, // era 2xl
-        "2xl": { value: "1.875rem" }, // era 3xl
-        "3xl": { value: "2.25rem" }, // era 4xl
-        "4xl": { value: "3rem" }, // era 5xl
-        "5xl": { value: "3.75rem" }, // era 6xl
-        "6xl": { value: "4.50rem" }, // novo nível coerente
+        xs: { value: "0.90rem" },
+        sm: { value: "1.00rem" },
+        md: { value: "1.125rem" },
+        lg: { value: "1.25rem" },
+        xl: { value: "1.50rem" },
+        "2xl": { value: "1.875rem" },
+        "3xl": { value: "2.25rem" },
+        "4xl": { value: "3rem" },
+        "5xl": { value: "3.75rem" },
+        "6xl": { value: "4.50rem" },
       },
       colors: {
         blue: {

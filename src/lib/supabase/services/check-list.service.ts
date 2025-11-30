@@ -2,9 +2,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { CheckListItem, CheckListWithItems } from "../models";
 
 export const checkListService = {
-  async getCheckListsWithItemsByStorieId(
+  async getCheckListsWithItemsByStoryId(
     supabase: SupabaseClient,
-    storieId: string
+    storyId: string
   ): Promise<CheckListWithItems[]> {
     type RawItem = {
       id: string;
@@ -18,7 +18,7 @@ export const checkListService = {
 
     type RawChecklist = {
       id: string;
-      storie_id: string;
+      story_id: string;
       type: string;
       title: string;
       created_at: string;
@@ -31,7 +31,7 @@ export const checkListService = {
       .select(
         `
       id,
-      storie_id,
+      story_id,
       type,
       title,
       created_at,
@@ -47,7 +47,7 @@ export const checkListService = {
       )
     `
       )
-      .eq("storie_id", storieId)
+      .eq("story_id", storyId)
       .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -55,7 +55,7 @@ export const checkListService = {
     return (
       (data as RawChecklist[])?.map((row) => ({
         id: row.id,
-        storie_id: row.storie_id,
+        story_id: row.story_id,
         type: row.type,
         title: row.title,
         created_at: row.created_at,

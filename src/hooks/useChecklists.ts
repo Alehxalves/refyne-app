@@ -6,7 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { checkListService } from "@/lib/supabase/services/check-list.service";
 import { CheckListWithItems } from "@/lib/supabase/models";
 
-export function useCheckLists(storieId: string) {
+export function useCheckLists(storyId: string) {
   const { supabase } = useSupabase();
   const { isLoaded, isSignedIn } = useUser();
   const queryClient = useQueryClient();
@@ -15,16 +15,16 @@ export function useCheckLists(storieId: string) {
     CheckListWithItems[],
     Error
   >({
-    queryKey: ["checklists", storieId],
-    enabled: isLoaded && isSignedIn && !!supabase && !!storieId,
+    queryKey: ["checklists", storyId],
+    enabled: isLoaded && isSignedIn && !!supabase && !!storyId,
     queryFn: async () => {
       if (!supabase) {
         throw new Error("Supabase client not available");
       }
 
-      const result = await checkListService.getCheckListsWithItemsByStorieId(
+      const result = await checkListService.getCheckListsWithItemsByStoryId(
         supabase,
-        storieId
+        storyId
       );
 
       return result.map((cl) => ({
@@ -48,12 +48,12 @@ export function useCheckLists(storieId: string) {
     },
 
     onMutate: async ({ itemId, isChecked }) => {
-      await queryClient.cancelQueries({ queryKey: ["checklists", storieId] });
+      await queryClient.cancelQueries({ queryKey: ["checklists", storyId] });
 
       const previousData =
         queryClient.getQueryData<CheckListWithItems[]>([
           "checklists",
-          storieId,
+          storyId,
         ]) || [];
 
       const nextData = previousData.map((cl) => ({
@@ -64,7 +64,7 @@ export function useCheckLists(storieId: string) {
       }));
 
       queryClient.setQueryData<CheckListWithItems[]>(
-        ["checklists", storieId],
+        ["checklists", storyId],
         nextData
       );
 
@@ -73,10 +73,7 @@ export function useCheckLists(storieId: string) {
 
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          ["checklists", storieId],
-          context.previousData
-        );
+        queryClient.setQueryData(["checklists", storyId], context.previousData);
       }
     },
   });
