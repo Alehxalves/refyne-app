@@ -130,7 +130,7 @@ export default function DashboardPage() {
                       fontWeight="medium"
                     >
                       <HStack justify="space-between">
-                        <Text>{boards.length}</Text>
+                        <Text>{boards?.length ?? 0}</Text>
                         <Box p="1" bg="purple.500" borderRadius="lg">
                           <SquareKanban color="white" />
                         </Box>
