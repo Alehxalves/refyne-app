@@ -1,7 +1,9 @@
+"use client";
+
 import { Box, Collapsible, HStack, Text } from "@chakra-ui/react";
 import { Lightbulb } from "lucide-react";
 
-export const goodStorieTip = () => {
+export const goodStoryTip = () => {
   return (
     <Collapsible.Root>
       <Collapsible.Trigger
@@ -11,11 +13,12 @@ export const goodStorieTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack>
+          <HStack maxW="100%">
             <Lightbulb color="#EAB308" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
+              truncate
             >
               Dica rápida: Como escrever histórias de usuário de forma clara
             </Text>
