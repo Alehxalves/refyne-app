@@ -95,12 +95,22 @@ export function useBoard(boardId: string) {
     },
   });
 
+  const deleteStoryMutation = useMutation({
+    mutationFn: async () => boardService.deleteBoard(supabase!, boardId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      queryClient.invalidateQueries({ queryKey: ["boards", user?.id] });
+    },
+  });
+
   return {
     board,
     isLoading,
     isFetching,
     error: error?.message ?? null,
     updateBoard: updateBoardMutation.mutateAsync,
+    deleteBoard: deleteStoryMutation.mutateAsync,
     isUpdating: updateBoardMutation.isPending,
     refetch: () =>
       queryClient.invalidateQueries({ queryKey: ["board", boardId] }),

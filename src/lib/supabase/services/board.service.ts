@@ -32,6 +32,12 @@ export const boardService = {
     return data;
   },
 
+  async deleteBoard(supabase: SupabaseClient, boardId: string): Promise<void> {
+    const { error } = await supabase.from("boards").delete().eq("id", boardId);
+
+    if (error) throw error;
+  },
+
   async getBoards(supabase: SupabaseClient, user_id: string): Promise<Board[]> {
     const { data, error } = await supabase
       .from("boards")

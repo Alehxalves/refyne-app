@@ -24,12 +24,14 @@ import Lottie from "lottie-react";
 import loadingAnimation from "@/assets/lottie/loading1.json";
 import errorAnimation from "@/assets/lottie/empty-face.json";
 import { LuSearch } from "react-icons/lu";
-import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import BoardSettings from "@/components/dashboard/board/BoardSettings";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const router = useRouter();
   const {
     boards = [],
     createBoard,
@@ -323,27 +325,35 @@ export default function DashboardPage() {
                   >
                     {filteredBoards.map((board) => (
                       <GridItem key={board.id}>
-                        <Link href={`/dashboard/board/${board.id}/backlog`}>
-                          <Card.Root
-                            borderRadius="lg"
-                            size="sm"
-                            borderWidth="1px"
-                            borderColor={{
-                              base: "gray.100",
-                              _dark: "gray.800",
-                            }}
-                            bg={{ base: "white", _dark: "gray.950" }}
-                            _hover={{
-                              borderColor: {
-                                base: "gray.300",
-                                _dark: "gray.600",
-                              },
-                              transform: "translateY(-1px)",
-                              transition: "all 0.15s ease-out",
-                            }}
+                        <Card.Root
+                          borderRadius="lg"
+                          size="sm"
+                          borderWidth="1px"
+                          borderColor={{
+                            base: "gray.100",
+                            _dark: "gray.800",
+                          }}
+                          bg={{ base: "white", _dark: "gray.950" }}
+                          _hover={{
+                            borderColor: {
+                              base: "gray.300",
+                              _dark: "gray.600",
+                            },
+                            transform: "translateY(-1px)",
+                            transition: "all 0.15s ease-out",
+                          }}
+                        >
+                          <Card.Body
+                            gap="3"
+                            cursor="pointer"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/board/${board.id}/backlog`
+                              )
+                            }
                           >
-                            <Card.Body gap="3" cursor="pointer">
-                              <HStack align="center" gap={3} mb="1">
+                            <HStack justify="space-between" gap={3} mb="1">
+                              <HStack>
                                 <Box
                                   w="8"
                                   h="8"
@@ -372,35 +382,36 @@ export default function DashboardPage() {
                                   )}
                                 </VStack>
                               </HStack>
-                              <VStack alignItems="flex-start" gap={0} mt="2">
-                                <Text
-                                  fontWeight="light"
-                                  fontSize="xs"
-                                  color="gray.500"
-                                >
-                                  Criado em{" "}
-                                  {format(
-                                    new Date(board.created_at),
-                                    "dd/MM/yyyy HH:mm",
-                                    { locale: ptBR }
-                                  )}
-                                </Text>
-                                <Text
-                                  fontWeight="light"
-                                  fontSize="xs"
-                                  color="gray.500"
-                                >
-                                  Atualizado em{" "}
-                                  {format(
-                                    new Date(board.updated_at),
-                                    "dd/MM/yyyy HH:mm",
-                                    { locale: ptBR }
-                                  )}
-                                </Text>
-                              </VStack>
-                            </Card.Body>
-                          </Card.Root>
-                        </Link>
+                              <BoardSettings boardId={board.id} />
+                            </HStack>
+                            <VStack alignItems="flex-start" gap={0} mt="2">
+                              <Text
+                                fontWeight="light"
+                                fontSize="xs"
+                                color="gray.500"
+                              >
+                                Criado em{" "}
+                                {format(
+                                  new Date(board.created_at),
+                                  "dd/MM/yyyy HH:mm",
+                                  { locale: ptBR }
+                                )}
+                              </Text>
+                              <Text
+                                fontWeight="light"
+                                fontSize="xs"
+                                color="gray.500"
+                              >
+                                Atualizado em{" "}
+                                {format(
+                                  new Date(board.updated_at),
+                                  "dd/MM/yyyy HH:mm",
+                                  { locale: ptBR }
+                                )}
+                              </Text>
+                            </VStack>
+                          </Card.Body>
+                        </Card.Root>
                       </GridItem>
                     ))}
                   </Grid>
