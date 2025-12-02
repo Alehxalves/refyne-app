@@ -15,344 +15,410 @@ import {
   Separator,
   Text,
   VStack,
+  IconButton,
 } from "@chakra-ui/react";
 import { useUser } from "@clerk/nextjs";
-import {
-  Grid3x3,
-  Kanban,
-  List,
-  Plus,
-  SquareActivity,
-  SquareKanban,
-} from "lucide-react";
-import React, { useState } from "react";
+import { Grid3x3, Kanban, List, Plus } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/assets/lottie/loading1.json";
 import errorAnimation from "@/assets/lottie/empty-face.json";
 import { LuSearch } from "react-icons/lu";
-import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import BoardSettings from "@/components/dashboard/board/BoardSettings";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const { boards, createBoard, isLoading, error } = useBoards();
+  const router = useRouter();
+  const {
+    boards = [],
+    createBoard,
+    isLoading,
+    isFetching,
+    error,
+  } = useBoards();
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [search, setSearch] = useState("");
 
   const handleCreateBoard = async () => {
     await createBoard({
-      title: "Novo Quadro",
+      title: "Novo quadro",
       description: "Descrição do quadro",
     });
   };
 
+  const recentBoardsCount = useMemo(() => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return boards.filter((b) => new Date(b.updated_at) >= sevenDaysAgo).length;
+  }, [boards]);
+
+  const filteredBoards = useMemo(() => {
+    if (!search.trim()) return boards;
+    const term = search.toLowerCase();
+    return boards.filter(
+      (b) =>
+        b.title?.toLowerCase().includes(term) ||
+        (b.description ?? "").toLowerCase().includes(term)
+    );
+  }, [boards, search]);
+
+  const isEmpty = !isLoading && !isFetching && boards.length === 0;
+  const isInitialLoading = (isLoading || isFetching) && boards.length === 0;
+
+  const firstNameOrEmail =
+    user?.firstName ?? user?.emailAddresses[0]?.emailAddress ?? "por aqui";
+
   return (
     <>
       <NavBar />
-      <Container px="4" py="4" spaceY="10">
-        <VStack align="left" gap="0">
-          <Text
-            fontWeight="bold"
-            fontSize={{ base: "md", sm: "lg", lg: "2xl" }}
-            mb="2"
-          >
-            Boas vindas,{" "}
-            {user?.firstName ?? user?.emailAddresses[0].emailAddress}! 👋
-          </Text>
-          <Text
-            fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-            color={{ base: "gray.600", _dark: "gray.400" }}
-          >
-            Crie quadros, refine histórias com o checklist INVEST e priorize o
-            que realmente importa usando MoSCoW, CSD e GUT.
-          </Text>
-          <Text
-            fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-            color={{ base: "gray.600", _dark: "gray.400" }}
-          >
-            Comece selecionando um quadro ou crie um novo para iniciar. 🚀
-          </Text>
-        </VStack>
-        {isLoading ? (
-          <Box mt="10" width={32} height={32} justifySelf="center">
-            <Lottie animationData={loadingAnimation} loop={true} />
+
+      <Container pt="6" pb="10" maxW="7xl">
+        <HStack justify="space-between" align="flex-start" mb="6">
+          <VStack align="flex-start" gap={1}>
+            <Text
+              fontWeight="semibold"
+              fontSize={{ base: "lg", sm: "xl", lg: "2xl" }}
+              letterSpacing="-0.02em"
+            >
+              Boas vindas, {firstNameOrEmail}! 👋
+            </Text>
+            <Text
+              fontSize={{ base: "xs", sm: "sm" }}
+              color={{ base: "gray.600", _dark: "gray.400" }}
+            >
+              Crie quadros, refine histórias com o checklist INVEST e priorize o
+              que realmente importa usando MoSCoW, CSD e GUT.
+            </Text>
+            <Text
+              fontSize={{ base: "xs", sm: "sm" }}
+              color={{ base: "gray.600", _dark: "gray.400" }}
+            >
+              Comece selecionando um quadro ou criando um novo. 🚀
+            </Text>
+          </VStack>
+        </HStack>
+        {isInitialLoading ? (
+          <Box mt="10" width={32} mx="auto">
+            <Lottie animationData={loadingAnimation} loop />
           </Box>
         ) : error ? (
-          <VStack w="100%">
-            <Box mt="10" width={32} justifySelf="center">
-              <Lottie animationData={errorAnimation} loop={true} />
+          <VStack w="100%" gap={4}>
+            <Box mt="6" width={32}>
+              <Lottie animationData={errorAnimation} loop />
             </Box>
-            <Box w="100%" justifyItems="center">
+            <Box textAlign="center">
               <Text
                 fontWeight="medium"
-                fontSize={{ base: "sm", sm: "md", lg: "md" }}
-                color={{ base: "gray.600", _dark: "gray.400" }}
+                fontSize={{ base: "sm", md: "md" }}
+                color={{ base: "gray.700", _dark: "gray.300" }}
               >
-                Ocorreu um erro ao carregar seus quadros!
+                Ocorreu um erro ao carregar seus quadros.
               </Text>
               <Text
-                fontSize={{ base: "sm", sm: "xs", lg: "xs" }}
-                color={{ base: "gray.600", _dark: "gray.400" }}
+                mt="1"
+                fontSize={{ base: "xs", md: "xs" }}
+                color={{ base: "gray.500", _dark: "gray.500" }}
               >
-                {error}
+                {String(error)}
               </Text>
             </Box>
           </VStack>
         ) : (
-          <VStack align="flex-start" gap="6">
+          <>
             <Grid
               templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }}
-              gap="6"
+              gap={4}
+              mb="8"
             >
-              <GridItem colSpan={2}>
+              <GridItem colSpan={{ base: 2, md: 2 }}>
                 <Card.Root
-                  width="250px"
-                  variant="elevated"
                   borderRadius="lg"
-                  size={{ base: "sm", md: "md" }}
+                  size="sm"
+                  bg={{ base: "white", _dark: "gray.900" }}
+                  borderWidth="1px"
+                  borderColor={{ base: "gray.100", _dark: "gray.800" }}
                 >
-                  <Card.Body
-                    gap="2"
-                    borderRadius="lg"
-                    bg={{ base: "gray.50", _dark: "gray.900" }}
-                  >
-                    <Card.Title
-                      fontWeight="bold"
-                      fontSize={{ base: "sm", sm: "md", lg: "md" }}
-                      color={{ base: "gray.900", _dark: "gray.50" }}
+                  <Card.Body gap="3">
+                    <Text
+                      fontSize="xs"
+                      textTransform="uppercase"
+                      letterSpacing="0.08em"
+                      color={{ base: "gray.500", _dark: "gray.500" }}
                     >
-                      Total de Quadros
-                    </Card.Title>
-                    <Card.Description
-                      fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-                      color={{ base: "gray.600", _dark: "gray.400" }}
-                      fontWeight="medium"
+                      Total de quadros
+                    </Text>
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="semibold"
+                      letterSpacing="-0.04em"
                     >
-                      <HStack justify="space-between">
-                        <Text>{boards?.length ?? 0}</Text>
-                        <Box p="1" bg="purple.500" borderRadius="lg">
-                          <SquareKanban color="white" />
-                        </Box>
-                      </HStack>
-                    </Card.Description>
+                      {boards.length}
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color={{ base: "gray.500", _dark: "gray.500" }}
+                    >
+                      Espaços ativos para refinar e priorizar requisitos.
+                    </Text>
                   </Card.Body>
                 </Card.Root>
               </GridItem>
-              <GridItem colSpan={2}>
+              <GridItem colSpan={{ base: 2, md: 2 }}>
                 <Card.Root
-                  width="250px"
-                  variant="elevated"
                   borderRadius="lg"
-                  size={{ base: "sm", md: "md" }}
+                  size="sm"
+                  bg={{ base: "white", _dark: "gray.900" }}
+                  borderWidth="1px"
+                  borderColor={{ base: "gray.100", _dark: "gray.800" }}
                 >
-                  <Card.Body
-                    gap="2"
-                    borderRadius="lg"
-                    bg={{ base: "gray.50", _dark: "gray.900" }}
-                  >
-                    <Card.Title
-                      fontWeight="bold"
-                      fontSize={{ base: "sm", sm: "md", lg: "md" }}
-                      color={{ base: "gray.900", _dark: "gray.50" }}
+                  <Card.Body gap="3">
+                    <Text
+                      fontSize="xs"
+                      textTransform="uppercase"
+                      letterSpacing="0.08em"
+                      color={{ base: "gray.500", _dark: "gray.500" }}
                     >
-                      Atividade Recente
-                    </Card.Title>
-                    <Card.Description
-                      fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-                      color={{ base: "gray.600", _dark: "gray.400" }}
-                      fontWeight="medium"
+                      Atividade recente (7 dias)
+                    </Text>
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="semibold"
+                      letterSpacing="-0.04em"
                     >
-                      <HStack justify="space-between">
-                        <Text>
-                          {
-                            boards.filter((b) => {
-                              const updatedAt = new Date(b.updated_at);
-                              const sevenDaysAgo = new Date();
-                              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                              return updatedAt >= sevenDaysAgo;
-                            }).length
-                          }
-                        </Text>
-                        <Box p="1" bg="purple.500" borderRadius="lg">
-                          <SquareActivity color="white" />
-                        </Box>
-                      </HStack>
-                    </Card.Description>
+                      {recentBoardsCount}
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color={{ base: "gray.500", _dark: "gray.500" }}
+                    >
+                      Quadros atualizados recentemente.
+                    </Text>
                   </Card.Body>
                 </Card.Root>
               </GridItem>
             </Grid>
-            <Separator w="100%" borderColor="gray.300" />
-            <VStack w="100%">
-              <VStack alignItems="flex-start" w="100%" mb="6">
-                <Text
-                  fontWeight="bold"
-                  fontSize={{ base: "md", sm: "lg", lg: "2xl" }}
-                  color={{ base: "gray.900", _dark: "gray.50" }}
-                >
-                  Seus Quadros
-                </Text>
-                <Text
-                  fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-                  color={{ base: "gray.600", _dark: "gray.400" }}
-                  fontWeight="medium"
-                >
-                  Gerencie seus quadros de forma eficiente
-                </Text>
+            <Separator borderColor={{ base: "gray.100", _dark: "gray.800" }} />
+            <VStack align="flex-start" w="100%" mt="6" gap={4}>
+              <HStack w="100%" justify="space-between" align="center">
+                <VStack align="flex-start" gap={1}>
+                  <Text
+                    fontWeight="semibold"
+                    fontSize={{ base: "md", sm: "lg" }}
+                    color={{ base: "gray.900", _dark: "gray.50" }}
+                  >
+                    Seus quadros
+                  </Text>
+                  <Text
+                    fontSize="xs"
+                    color={{ base: "gray.600", _dark: "gray.400" }}
+                  >
+                    Gerencie espaços de backlog para cada produto ou projeto.
+                  </Text>
+                </VStack>
                 <Button
-                  mt="4"
-                  mb="4"
-                  bg={{ base: "gray.900", _dark: "gray.200" }}
-                  size={{ base: "xs", sm: "sm", lg: "sm" }}
+                  size="xs"
+                  borderRadius="full"
                   onClick={handleCreateBoard}
                   disabled={isLoading}
                 >
-                  <Plus />
-                  Criar novo quadro
+                  <Plus size={14} />
+                  Novo quadro
                 </Button>
-                <HStack
-                  gap="2"
-                  p="2"
-                  w="100%"
-                  borderRadius="lg"
-                  bg={{ base: "gray.50", _dark: "gray.900" }}
-                >
-                  <Button
-                    size={{ base: "xs", sm: "sm", lg: "sm" }}
-                    variant={viewMode === "grid" ? "solid" : "ghost"}
-                    onClick={() => setViewMode("grid")}
-                    p="0"
-                  >
-                    <Grid3x3 />
-                  </Button>
-                  <Button
-                    size={{ base: "xs", sm: "sm", lg: "sm" }}
-                    variant={viewMode === "list" ? "solid" : "ghost"}
-                    onClick={() => setViewMode("list")}
-                    p="0"
-                  >
-                    <List />
-                  </Button>
-                </HStack>
-                {/* <Button
-                  bg={{ base: "gray.900", _dark: "gray.200" }}
-                  size={{ base: "xs", sm: "sm", lg: "sm" }}
-                  p="0"
-                  w="100%"
-                >
-                  <Filter />
-                  Filtro
-                </Button> */}
-
+              </HStack>
+              <HStack w="100%" gap={3} align="center" justify="space-between">
                 <InputGroup flex="1" startElement={<LuSearch />}>
                   <Input
-                    placeholder="Buscar quadros..."
-                    borderColor={{ base: "gray.400", _dark: "gray.500" }}
+                    placeholder="Buscar quadros por nome ou descrição..."
+                    borderRadius="full"
+                    borderColor={{ base: "gray.200", _dark: "gray.700" }}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </InputGroup>
-              </VStack>
+                <HStack
+                  gap={1}
+                  borderRadius="full"
+                  px="1"
+                  py="0.5"
+                  bg={{ base: "gray.50", _dark: "gray.900" }}
+                  borderWidth="1px"
+                  borderColor={{ base: "gray.200", _dark: "gray.800" }}
+                >
+                  <IconButton
+                    borderRadius="full"
+                    aria-label="Visualizar em grade"
+                    size="xs"
+                    variant={viewMode === "grid" ? "solid" : "ghost"}
+                    onClick={() => setViewMode("grid")}
+                  >
+                    <Grid3x3 size={14} />
+                  </IconButton>
+                  <IconButton
+                    borderRadius="full"
+                    aria-label="Visualizar em lista"
+                    size="xs"
+                    variant={viewMode === "list" ? "solid" : "ghost"}
+                    onClick={() => setViewMode("list")}
+                  >
+                    <List style={{ borderRadius: "5px" }} size={14} />
+                  </IconButton>
+                </HStack>
+              </HStack>
+            </VStack>
+            <Separator my="6" />
+            {isEmpty ? (
+              <Box
+                w="100%"
+                borderWidth="1px"
+                borderStyle="dashed"
+                borderRadius="lg"
+                p="6"
+                textAlign="center"
+                bg={{ base: "gray.50", _dark: "gray.900" }}
+              >
+                <Text fontWeight="medium" mb="2">
+                  Você ainda não possui quadros.
+                </Text>
+                <Text
+                  fontSize="sm"
+                  color={{ base: "gray.600", _dark: "gray.400" }}
+                  mb="4"
+                >
+                  Crie o primeiro quadro para começar a organizar seu backlog,
+                  refinar histórias e priorizar requisitos.
+                </Text>
+                <Button
+                  size="sm"
+                  onClick={handleCreateBoard}
+                  disabled={isLoading}
+                >
+                  <Plus size={16} />
+                  Criar primeiro quadro
+                </Button>
+              </Box>
+            ) : (
               <Box>
-                {!isLoading && boards.length === 0 ? (
-                  <Text>Você não possui quadros</Text>
+                {filteredBoards.length === 0 ? (
+                  <Text
+                    fontSize="sm"
+                    color={{ base: "gray.600", _dark: "gray.400" }}
+                  >
+                    Nenhum quadro encontrado para “{search}”.
+                  </Text>
                 ) : (
                   <Grid
                     w="100%"
                     templateColumns={
                       viewMode === "grid"
                         ? {
-                            base: "repeat(1, 0fr)",
-                            sm: "repeat(2, 0fr)",
-                            md: "repeat(3, 0fr)",
-                            lg: "repeat(4, 0fr)",
+                            base: "repeat(1, minmax(0, 1fr))",
+                            sm: "repeat(2, minmax(0, 1fr))",
+                            md: "repeat(3, minmax(0, 1fr))",
                           }
-                        : {}
+                        : { base: "1fr" }
                     }
-                    gap="4"
-                    gapX={4}
+                    gap={4}
                   >
-                    {boards.map((board) => (
-                      <Link
-                        key={board.id}
-                        href={`/dashboard/board/${board.id}/backlog`}
-                      >
-                        <GridItem>
-                          <Card.Root
-                            minW={
-                              viewMode === "grid"
-                                ? { base: "150px", md: "250px", lg: "275px" }
-                                : { base: "300px", md: "300px", lg: "500px" }
+                    {filteredBoards.map((board) => (
+                      <GridItem key={board.id}>
+                        <Card.Root
+                          borderRadius="lg"
+                          size="sm"
+                          borderWidth="1px"
+                          borderColor={{
+                            base: "gray.100",
+                            _dark: "gray.800",
+                          }}
+                          bg={{ base: "white", _dark: "gray.950" }}
+                          _hover={{
+                            borderColor: {
+                              base: "gray.300",
+                              _dark: "gray.600",
+                            },
+                            transform: "translateY(-1px)",
+                            transition: "all 0.15s ease-out",
+                          }}
+                        >
+                          <Card.Body
+                            gap="3"
+                            cursor="pointer"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/board/${board.id}/backlog`
+                              )
                             }
-                            variant="elevated"
-                            borderRadius="lg"
-                            size={{ base: "sm", md: "md" }}
                           >
-                            <Card.Body
-                              gap="2"
-                              cursor="pointer"
-                              borderRadius="lg"
-                              bg={{ base: "gray.50", _dark: "gray.900" }}
-                              _hover={{
-                                bg: "rgba(0,0,0,0.1)",
-                              }}
-                            >
-                              <HStack align="center">
-                                <Kanban
-                                  color={board.color}
-                                  width={20}
-                                  height={20}
-                                />
-                                <Card.Title
-                                  mb="2"
-                                  fontWeight="bold"
-                                  fontSize={{ base: "sm", sm: "md", lg: "md" }}
+                            <HStack justify="space-between" gap={3} mb="1">
+                              <HStack>
+                                <Box
+                                  w="8"
+                                  h="8"
+                                  borderRadius="lg"
+                                  bg={board.color || "purple.500"}
+                                  display="flex"
+                                  alignItems="center"
+                                  justifyContent="center"
                                 >
-                                  {board.title}
-                                </Card.Title>
+                                  <Kanban color="white" size={18} />
+                                </Box>
+                                <VStack align="flex-start" gap={0} minW={0}>
+                                  <Text fontWeight="medium" fontSize="sm">
+                                    {board.title}
+                                  </Text>
+                                  {board.description && (
+                                    <Text
+                                      fontSize="xs"
+                                      color={{
+                                        base: "gray.600",
+                                        _dark: "gray.400",
+                                      }}
+                                    >
+                                      {board.description}
+                                    </Text>
+                                  )}
+                                </VStack>
                               </HStack>
-                              <Card.Description
-                                fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
-                                color={{ base: "gray.600", _dark: "gray.400" }}
-                                fontWeight="medium"
+                              <BoardSettings boardId={board.id} />
+                            </HStack>
+                            <VStack alignItems="flex-start" gap={0} mt="2">
+                              <Text
+                                fontWeight="light"
+                                fontSize="xs"
+                                color="gray.500"
                               >
-                                {board.description}
-                              </Card.Description>
-                              <VStack alignItems="flex-start" gap="0">
-                                <Text
-                                  fontWeight="light"
-                                  fontSize="sm"
-                                  color="gray.500"
-                                >
-                                  Criado em{" "}
-                                  {format(
-                                    new Date(board.created_at),
-                                    "dd/MM/yyyy HH:mm",
-                                    { locale: ptBR }
-                                  )}
-                                </Text>
-                                <Text
-                                  fontWeight="light"
-                                  fontSize="sm"
-                                  color="gray.500"
-                                >
-                                  Atualizado em{" "}
-                                  {format(
-                                    new Date(board.updated_at),
-                                    "dd/MM/yyyy HH:mm",
-                                    { locale: ptBR }
-                                  )}
-                                </Text>
-                              </VStack>
-                            </Card.Body>
-                          </Card.Root>
-                        </GridItem>
-                      </Link>
+                                Criado em{" "}
+                                {format(
+                                  new Date(board.created_at),
+                                  "dd/MM/yyyy HH:mm",
+                                  { locale: ptBR }
+                                )}
+                              </Text>
+                              <Text
+                                fontWeight="light"
+                                fontSize="xs"
+                                color="gray.500"
+                              >
+                                Atualizado em{" "}
+                                {format(
+                                  new Date(board.updated_at),
+                                  "dd/MM/yyyy HH:mm",
+                                  { locale: ptBR }
+                                )}
+                              </Text>
+                            </VStack>
+                          </Card.Body>
+                        </Card.Root>
+                      </GridItem>
                     ))}
                   </Grid>
                 )}
               </Box>
-            </VStack>
-          </VStack>
+            )}
+          </>
         )}
       </Container>
     </>

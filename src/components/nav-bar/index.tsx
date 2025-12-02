@@ -3,26 +3,27 @@
 import {
   Box,
   Button,
+  Container,
   Flex,
   HStack,
+  IconButton,
+  Link,
+  Separator,
   Skeleton,
   SkeletonCircle,
   Spinner,
   Stack,
   Text,
   useMediaQuery,
-  IconButton,
 } from "@chakra-ui/react";
 import Image from "next/image";
 import refyneLogo from "@/assets/refyne-logo.png";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
-import { LogOut, Menu, MoveRight, SquareKanban, SquarePen } from "lucide-react";
+import { LogOut, MoveRight, SquareKanban, SquarePen } from "lucide-react";
 import { useState } from "react";
 
-import { MobileSidebarMenu } from "../dashboard/menu/MobileSidebarMenu";
-import { useDisclosure } from "@chakra-ui/react";
 import UserMenu from "../clerk/UserMenu";
 import SignIn from "../clerk/SignIn";
 
@@ -38,15 +39,9 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [isMobile] = useMediaQuery(["(max-width: 1024px)"]);
+  const [isMobile] = useMediaQuery(["(max-width: 768px)"]);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-
-  const {
-    open: isMobileMenuOpen,
-    onOpen: onOpenMobileMenu,
-    onClose: onCloseMobileMenu,
-  } = useDisclosure();
 
   const isDashboardPage = pathname === "/dashboard";
   const isBoardPage = pathname.startsWith("/dashboard/board/");
@@ -67,113 +62,156 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
   };
 
   return (
-    <>
-      <Box
-        as="header"
-        position="sticky"
-        top="0"
-        zIndex="banner"
-        px="4"
-        h="16"
-        bg={{ base: "gray.50", _dark: "gray.900" }}
-        borderBottomWidth="1px"
-        borderColor={{ base: "gray.200", _dark: "gray.700" }}
-        display="flex"
-        alignItems="center"
-      >
-        <Flex w="100%" justifyContent="space-between" alignItems="center">
-          <HStack gap={3} align="center">
-            {isMobile && (isDashboardPage || isBoardPage) && (
-              <IconButton
-                aria-label="Abrir menu"
-                variant="ghost"
-                size="sm"
-                onClick={onOpenMobileMenu}
-                _hover={{ bg: { base: "gray.100", _dark: "blue.900" } }}
-              >
-                <Menu size={18} />
-              </IconButton>
-            )}
-            <HStack gap={2} cursor="pointer" onClick={handleGoToHome}>
-              <Image width={30} height={30} alt="Logo" src={refyneLogo} />
+    <Box
+      as="header"
+      position="sticky"
+      top="0"
+      zIndex="banner"
+      borderBottomWidth="1px"
+      borderColor={{ base: "gray.100", _dark: "gray.800" }}
+      bg={{ base: "gray.50", _dark: "gray.900" }}
+    >
+      <Container maxW="8xl" px={{ base: 3, md: 4 }} h="16">
+        <Flex w="100%" h="100%" align="center" justify="space-between">
+          <HStack gap={4} align="center">
+            <HStack
+              gap={2}
+              cursor="pointer"
+              onClick={handleGoToHome}
+              ml={isMobile ? 0 : -5}
+            >
+              <Image
+                width={28}
+                height={28}
+                alt="Logo Refyne"
+                src={refyneLogo}
+              />
               {!isMobile && (
-                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
+                <Text
+                  fontWeight="semibold"
+                  fontSize={{ base: "sm", md: "md" }}
+                  letterSpacing="-0.02em"
+                >
                   Refyne
                 </Text>
               )}
             </HStack>
+            {(isDashboardPage || isBoardPage) && (
+              <Separator
+                orientation="vertical"
+                h="6"
+                borderColor={{ base: "gray.200", _dark: "gray.700" }}
+              />
+            )}
+            {isDashboardPage && (
+              <HStack gap={2}>
+                <SquareKanban size={16} />
+                <Text
+                  fontSize="sm"
+                  fontWeight="medium"
+                  color={{ base: "gray.700", _dark: "gray.200" }}
+                >
+                  Meus boards
+                </Text>
+              </HStack>
+            )}
             {isBoardPage && (
-              <>
-                <HStack gap={2}>
-                  <SquareKanban size={18} color={boardColor ?? "#3B82F6"} />
+              <HStack gap={2} maxW={{ base: "180px", md: "260px" }}>
+                {!isMobile && (
+                  <Link
+                    href="/dashboard"
+                    fontSize="xs"
+                    color={{ base: "gray.600", _dark: "gray.400" }}
+                  >
+                    <SquareKanban size={14} />
+                    <Text>Boards</Text>
+                  </Link>
+                )}
+
+                {!isMobile && (
+                  <Text fontSize="xs" color="gray.400">
+                    /
+                  </Text>
+                )}
+                <HStack gap={2} minW={0}>
+                  <Box
+                    w="8px"
+                    h="8px"
+                    borderRadius="full"
+                    bg={boardColor}
+                    flexShrink={0}
+                  />
                   {boardTitle ? (
                     <Text
                       fontSize="sm"
                       fontWeight="medium"
-                      maxW={{ base: "120px", md: "200px" }}
+                      color={{ base: "gray.800", _dark: "gray.100" }}
                     >
                       {boardTitle}
                     </Text>
                   ) : (
-                    <Skeleton height="4" width="150px" />
+                    <Skeleton height="3" width="120px" />
                   )}
-                  {boardTitle && (
-                    <SquarePen
-                      cursor="pointer"
-                      onClick={onEditBoard}
-                      size={18}
-                    />
+
+                  {boardTitle && onEditBoard && (
+                    <IconButton
+                      aria-label="Editar board"
+                      variant="ghost"
+                      size="xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditBoard();
+                      }}
+                    >
+                      <SquarePen size={14} />
+                    </IconButton>
                   )}
                 </HStack>
-              </>
+              </HStack>
             )}
           </HStack>
-
           {!isLoaded ? (
-            <Stack maxW="xs" direction="row" align="center">
+            <Stack direction="row" align="center" gap={2}>
               <SkeletonCircle size="8" />
-              <Skeleton height="3" w="80px" />
+              {!isMobile && <Skeleton height="3" w="80px" />}
             </Stack>
           ) : isSignedIn ? (
             isDashboardPage || isBoardPage ? (
               <UserMenu />
             ) : (
-              <HStack gap={2} align="flex-end">
+              <HStack gap={2}>
                 <Button
                   size="xs"
                   fontSize="xs"
+                  borderRadius="full"
+                  variant="solid"
                   onClick={handleGoToDash}
                   disabled={isNavigating || isLeaving}
                 >
                   {isNavigating ? (
-                    <Spinner size="xs" mr="4" />
+                    <Spinner size="xs" />
                   ) : (
-                    <MoveRight style={{ marginRight: 4 }} />
-                  )}{" "}
-                  Acessar Dashboard
+                    <MoveRight size={14} />
+                  )}
+                  Dashboard
                 </Button>
-                <Button
-                  variant="ghost"
+                <IconButton
+                  title="Sair"
+                  aria-label="Sair"
                   size="xs"
+                  variant="ghost"
                   onClick={handleSignOut}
                   disabled={isNavigating || isLeaving}
                 >
-                  {isLeaving ? <Spinner size="xs" /> : <LogOut />}
-                  Sair
-                </Button>
+                  {isLeaving ? <Spinner size="xs" /> : <LogOut size={16} />}
+                </IconButton>
               </HStack>
             )
           ) : (
             <SignIn />
           )}
         </Flex>
-      </Box>
-      {isMobile && (
-        <MobileSidebarMenu
-          isOpen={isMobileMenuOpen}
-          onClose={onCloseMobileMenu}
-        />
-      )}
-    </>
+      </Container>
+    </Box>
   );
 }

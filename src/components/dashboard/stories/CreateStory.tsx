@@ -1,3 +1,4 @@
+// src/components/dashboard/stories/CreateStory.tsx
 "use client";
 
 import {
@@ -29,16 +30,19 @@ interface CreateStoryProps {
   isOpen: boolean;
   onClose: () => void;
   shouldRefetch?: (value: boolean) => void;
+  storyGroupId?: string | null;
 }
 
 export default function CreateStory({
   isOpen,
   onClose,
   shouldRefetch,
+  storyGroupId = null,
 }: CreateStoryProps) {
   const params = useParams();
   const boardId = params.id as string;
   const { createStory, isLoading } = useStories(boardId);
+
   const {
     handleSubmit,
     formState: { errors },
@@ -54,12 +58,13 @@ export default function CreateStory({
     },
   });
 
-  const onSubmit = handleSubmit(async function handleSend(data: StoryValues) {
+  const onSubmit = handleSubmit(async (data: StoryValues) => {
     try {
       await createStory({
         board_id: boardId,
         title: data.title,
         description: data.description,
+        story_group_id: storyGroupId,
       });
       shouldRefetch?.(true);
       reset();

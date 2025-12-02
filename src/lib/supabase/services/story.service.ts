@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Story } from "../models";
+import { Story, StoryWithPrioritization } from "../models";
 
 export const storyService = {
   async createStory(
@@ -15,9 +15,24 @@ export const storyService = {
       | "archived"
     >
   ): Promise<Story> {
+    const { data: lastStory, error: lastError } = await supabase
+      .from("stories")
+      .select("sort_order")
+      .eq("board_id", story.board_id)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastError) throw lastError;
+
+    const nextSortOrder = (lastStory?.sort_order ?? -1) + 1;
+
     const { data: createdStory, error } = await supabase
       .from("stories")
-      .insert(story)
+      .insert({
+        ...story,
+        sort_order: nextSortOrder,
+      })
       .select()
       .single();
 
@@ -57,8 +72,9 @@ export const storyService = {
 
     if (itemsError) throw itemsError;
 
-    return createdStory;
+    return createdStory as Story;
   },
+
   async updateStory(
     supabase: SupabaseClient,
     storyId: string,
@@ -82,37 +98,84 @@ export const storyService = {
 
     if (error) throw error;
   },
+
   async deleteStory(supabase: SupabaseClient, storyId: string): Promise<void> {
     const { error } = await supabase.from("stories").delete().eq("id", storyId);
 
     if (error) throw error;
   },
+
   async getStoryById(
     supabase: SupabaseClient,
     storyId: string
-  ): Promise<Story> {
+  ): Promise<StoryWithPrioritization> {
     const { data, error } = await supabase
       .from("stories")
-      .select("*")
+      .select(
+        `
+      *,
+      prioritization_technique:prioritization_techniques(*)
+    `
+      )
       .eq("id", storyId)
       .single();
 
     if (error) throw error;
-    return data || {};
+    return data as StoryWithPrioritization;
   },
 
   async getStoriesByBoardId(
     supabase: SupabaseClient,
     boardId: string
-  ): Promise<Story[]> {
+  ): Promise<StoryWithPrioritization[]> {
     const { data, error } = await supabase
       .from("stories")
-      .select("*")
+      .select(
+        `
+      *,
+      prioritization_technique:prioritization_techniques(*)
+    `
+      )
       .eq("board_id", boardId)
       .eq("archived", false)
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return (data ?? []) as StoryWithPrioritization[];
+  },
+
+  async swapStoriesOrder(
+    supabase: SupabaseClient,
+    storyId: string,
+    targetStoryId: string
+  ): Promise<void> {
+    const { data, error } = await supabase
+      .from("stories")
+      .select("id, sort_order, board_id, story_group_id")
+      .in("id", [storyId, targetStoryId]);
+
+    if (error) throw error;
+    if (!data || data.length !== 2) return;
+
+    const [s1, s2] = data;
+    if (s1.board_id !== s2.board_id) {
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    const { error: updateError1 } = await supabase
+      .from("stories")
+      .update({ sort_order: s2.sort_order, updated_at: now })
+      .eq("id", s1.id);
+
+    if (updateError1) throw updateError1;
+
+    const { error: updateError2 } = await supabase
+      .from("stories")
+      .update({ sort_order: s1.sort_order, updated_at: now })
+      .eq("id", s2.id);
+
+    if (updateError2) throw updateError2;
   },
 };

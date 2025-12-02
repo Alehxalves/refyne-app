@@ -1,19 +1,19 @@
 import ConfirmAction from "@/components/utils/ConfirmAction";
-import { useStory } from "@/hooks/useStories";
+import { useBoard } from "@/hooks/useBoards";
 import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react";
-import { Archive, Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Trash } from "lucide-react";
 import React from "react";
 
-interface StorySettingsProps {
-  storyId: string;
+interface BoardSettingsProps {
+  boardId: string;
   shouldRefetch?: (value: boolean) => void;
 }
 
-export default function StorySettings({
-  storyId,
+export default function BoardSettings({
+  boardId,
   shouldRefetch,
-}: StorySettingsProps) {
-  const { archiveStory, deleteStory } = useStory(storyId);
+}: BoardSettingsProps) {
+  const { deleteBoard } = useBoard(boardId);
 
   const {
     open: isConfirmDeleteOpen,
@@ -39,27 +39,10 @@ export default function StorySettings({
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
-              {/* <Menu.Item
-                value="archive-story"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    if (storyId) {
-                      await archiveStory();
-                      shouldRefetch?.(true);
-                    }
-                  } catch (error) {
-                    console.error("Erro ao arquivar a história:", error);
-                  }
-                }}
-              >
-                <Archive size="14" color="#18181B" />
-                Arquivar
-              </Menu.Item> */}
               <Menu.Item
                 cursor="pointer"
-                value="delete-story"
-                onClick={async (e) => {
+                value="delete-board"
+                onClick={(e) => {
                   e.stopPropagation();
                   onOpenConfirmDelete();
                 }}
@@ -74,13 +57,13 @@ export default function StorySettings({
       <ConfirmAction
         isOpen={isConfirmDeleteOpen}
         onClose={onCloseConfirmDelete}
-        title="Excluir história"
-        description="Tem certeza que deseja excluir esta história? Essa ação não poderá ser desfeita."
+        title="Excluir quadro"
+        description="Tem certeza que deseja excluir este quadro? Essa ação não poderá ser desfeita."
         confirmLabel="Excluir"
         cancelLabel="Cancelar"
         onConfirm={async () => {
-          if (!storyId) return;
-          await deleteStory();
+          if (!boardId) return;
+          await deleteBoard();
           shouldRefetch?.(true);
         }}
       />

@@ -72,6 +72,16 @@ export default function UpdateBoard({
       "gray.500",
     ]);
 
+  const colorOptions = [
+    blue500,
+    green500,
+    yellow500,
+    red500,
+    purple500,
+    orange500,
+    gray500,
+  ];
+
   return (
     <Dialog.Root key="md" size="lg" open={isOpen} onOpenChange={onClose}>
       <Portal>
@@ -96,31 +106,22 @@ export default function UpdateBoard({
                       required
                     />
                   </Box>
-                  <Box spaceY="2">
+                  <Box spaceY="2" spaceX="2">
                     <Text>Cor do Quadro</Text>
-                    {[
-                      blue500,
-                      green500,
-                      yellow500,
-                      red500,
-                      purple500,
-                      orange500,
-                      gray500,
-                    ].map((color, index) => (
+                    {colorOptions.map((color) => (
                       <Button
                         name="board_color"
-                        borderRadius="3xl"
+                        borderRadius="full"
                         key={color}
                         bg={color}
+                        aria-label={`Selecionar cor ${color}`}
                         onClick={() => setNewColor(color)}
-                        borderWidth={newColor === color ? "4px" : "0px"}
+                        borderWidth={color === newColor ? "3px" : "0px"}
                         borderColor={
                           color === newColor ? "gray.800" : "transparent"
                         }
-                        mr={index < 6 ? 2 : 0}
                         _hover={{
-                          borderColor: "gray.600",
-                          borderWidth: "2px",
+                          transform: "scale(1.05)",
                         }}
                       />
                     ))}

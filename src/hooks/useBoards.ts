@@ -1,125 +1,118 @@
 "use client";
 
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { boardService } from "@/lib/supabase/services/board.service";
 import { Board } from "@/lib/supabase/models";
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
 import { useSupabase } from "@/lib/supabase/SupabaseProvider";
 
 export function useBoards() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { supabase } = useSupabase();
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  async function loadBoards() {
-    if (!user) throw new Error("User not authenticated");
+  const isQueryEnabled = !!user && !!supabase;
 
-    setIsLoading(true);
-    try {
-      const boardsData = await boardService.getBoards(
-        supabase!,
-        user.id as string
-      );
-      setBoards(boardsData);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os quadros."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const {
+    data: boards = [],
+    isLoading: queryLoading,
+    isFetching,
+    error,
+  } = useQuery<Board[], Error>({
+    queryKey: ["boards", user?.id],
+    enabled: isQueryEnabled,
+    queryFn: async () => {
+      if (!supabase) throw new Error("Supabase client not available");
+      if (!user) throw new Error("User not authenticated");
 
-  async function createBoard(boardData: {
-    title: string;
-    description?: string;
-    color?: string;
-    text_color?: string;
-  }) {
-    if (!user) throw new Error("User not authenticated");
+      return boardService.getBoards(supabase, user.id as string);
+    },
+  });
 
-    setIsLoading(true);
-    try {
-      const newBoard = await boardService.createBoard(supabase!, {
+  const isLoading = !isLoaded || !isQueryEnabled || queryLoading;
+
+  const createBoardMutation = useMutation<
+    Board,
+    Error,
+    { title: string; description?: string; color?: string; text_color?: string }
+  >({
+    mutationFn: async (boardData) => {
+      if (!supabase) throw new Error("Supabase client not available");
+      if (!user) throw new Error("User not authenticated");
+
+      return boardService.createBoard(supabase, {
         ...boardData,
         user_id: user.id as string,
       });
-
-      setBoards((prevBoards) => [newBoard, ...prevBoards]);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível criar o quadro."
+    },
+    onSuccess: (newBoard) => {
+      queryClient.setQueryData<Board[]>(["boards", user?.id], (old) =>
+        old ? [newBoard, ...old] : [newBoard]
       );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+  });
 
-  useEffect(() => {
-    if (user) loadBoards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, user]);
-
-  return { boards, isLoading, error, createBoard };
+  return {
+    boards,
+    isLoading,
+    isFetching,
+    error: error ? error.message : null,
+    createBoard: createBoardMutation.mutateAsync,
+    refetch: () =>
+      queryClient.invalidateQueries({ queryKey: ["boards", user?.id] }),
+  };
 }
 
 export function useBoard(boardId: string) {
   const { user } = useUser();
   const { supabase } = useSupabase();
-  const [board, setBoard] = useState<Board | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  async function loadBoard() {
-    if (!user) throw new Error("User not authenticated");
-    if (!boardId) return;
+  const { data, isLoading, isFetching, error } = useQuery<Board | null, Error>({
+    queryKey: ["board", boardId],
+    enabled: !!user && !!supabase && !!boardId,
+    queryFn: async () => {
+      if (!supabase) throw new Error("Supabase client not available");
+      const result = await boardService.getBoard(supabase, boardId);
+      return result ?? null;
+    },
+  });
 
-    setIsLoading(true);
-    try {
-      const board = await boardService.getBoard(supabase!, boardId);
-      setBoard(board);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar o quadro."
+  const board = data ?? null;
+
+  const updateBoardMutation = useMutation<Board, Error, Partial<Board>>({
+    mutationFn: async (updates) => {
+      if (!supabase) throw new Error("Supabase client not available");
+      return boardService.updateBoard(supabase, boardId, { ...updates });
+    },
+    onSuccess: (updatedBoard) => {
+      queryClient.setQueryData<Board | null>(["board", boardId], updatedBoard);
+      queryClient.setQueryData<Board[]>(
+        ["boards", user?.id],
+        (old) =>
+          old?.map((b) => (b.id === updatedBoard.id ? updatedBoard : b)) ?? old
       );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+  });
 
-  async function updateBoard(updates: Partial<Board>) {
-    if (!user) throw new Error("User not authenticated");
+  const deleteStoryMutation = useMutation({
+    mutationFn: async () => boardService.deleteBoard(supabase!, boardId),
 
-    setIsLoading(true);
-    try {
-      const updatedBoard = await boardService.updateBoard(supabase!, boardId, {
-        ...updates,
-      });
-      setBoard(updatedBoard);
-      return updatedBoard;
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível atualizar o quadro."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      queryClient.invalidateQueries({ queryKey: ["boards", user?.id] });
+    },
+  });
 
-  useEffect(() => {
-    if (user) loadBoard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, user]);
-
-  return { board, isLoading, error, loadBoard, updateBoard };
+  return {
+    board,
+    isLoading,
+    isFetching,
+    error: error?.message ?? null,
+    updateBoard: updateBoardMutation.mutateAsync,
+    deleteBoard: deleteStoryMutation.mutateAsync,
+    isUpdating: updateBoardMutation.isPending,
+    refetch: () =>
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] }),
+  };
 }

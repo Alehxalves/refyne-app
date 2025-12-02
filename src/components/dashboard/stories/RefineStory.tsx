@@ -145,7 +145,7 @@ export default function RefineStory({
               </Dialog.Title>
               {error && (
                 <Text fontSize="xs" color="red.500" mt="1">
-                  {error}
+                  {String(error)}
                 </Text>
               )}
             </Dialog.Header>
