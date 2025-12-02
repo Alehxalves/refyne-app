@@ -3,7 +3,7 @@
 import CreateStory from "@/components/dashboard/stories/CreateStory";
 import RefineStory from "@/components/dashboard/stories/RefineStory";
 import { useStories } from "@/hooks/useStories";
-import { Story, StoryGroup } from "@/lib/supabase/models";
+import { StoryGroup, StoryWithPrioritization } from "@/lib/supabase/models";
 import {
   Badge,
   Box,
@@ -36,16 +36,23 @@ import StoryGroupSettings from "@/components/dashboard/stories/story-group/Story
 import UpdateStoryGroup from "@/components/dashboard/stories/story-group/UpdateStoryGroup";
 import Lottie from "lottie-react";
 import loadingAnimation from "@/assets/lottie/loading1.json";
+import { csdLevelsPtBr, moscowLevelsPtBr } from "@/lib/utils";
+import { sortStoriesForGroup } from "@/components/utils/helpers";
+import StoryGroupFilter from "@/components/dashboard/stories/story-group/StoryGroupFilter";
 
 interface StoryProps {
-  story: Story;
+  story: StoryWithPrioritization;
   isMobile?: boolean;
-  onEdit?: (story: Story) => void;
-  onRefine?: (story: Story) => void;
   shouldRefetch?: (value: boolean) => void;
+  onDropStory?: (e: DragEvent<HTMLDivElement>, storyId: string) => void;
 }
 
-function StoryList({ story, isMobile, shouldRefetch }: StoryProps) {
+function StoryList({
+  story,
+  isMobile,
+  shouldRefetch,
+  onDropStory,
+}: StoryProps) {
   const { checkLists } = useCheckLists(story.id);
 
   const {
@@ -62,6 +69,31 @@ function StoryList({ story, isMobile, shouldRefetch }: StoryProps) {
   const [isHammering, setIsHammering] = useState(false);
   const [isRefined, setIsRefined] = useState(false);
 
+  const prioritization = story.prioritization_technique;
+
+  const moscowLevel =
+    moscowLevelsPtBr[prioritization?.moscow as keyof typeof moscowLevelsPtBr];
+  const csdLevel =
+    csdLevelsPtBr[prioritization?.csd as keyof typeof csdLevelsPtBr];
+  const gutScore =
+    prioritization?.useGut &&
+    prioritization.gut_g_value *
+      prioritization.gut_u_value *
+      prioritization.gut_t_value;
+
+  const moscowPalette = {
+    MUST: "blue",
+    SHOULD: "green",
+    COULD: "orange",
+    WONT: "red",
+  };
+
+  const csdPalette = {
+    CERTAINTIES: "blue",
+    SUPPOSITIONS: "green",
+    DOUBTS: "orange",
+  };
+
   function triggerHammer() {
     setIsHammering(true);
     setTimeout(() => setIsHammering(false), 350);
@@ -72,6 +104,14 @@ function StoryList({ story, isMobile, shouldRefetch }: StoryProps) {
       draggable
       onDragStart={(e: DragEvent<HTMLDivElement>) => {
         e.dataTransfer.setData("text/plain", story.id);
+      }}
+      onDragOver={(e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+      }}
+      onDrop={(e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDropStory?.(e, story.id);
       }}
     >
       <Card.Root
@@ -93,10 +133,67 @@ function StoryList({ story, isMobile, shouldRefetch }: StoryProps) {
           <HStack alignItems="flex-start" justify="space-between">
             <VStack align="flex-start" gap="1">
               {isRefined && (
-                <Badge colorPalette="green" variant="subtle" py="0.5">
+                <Badge
+                  colorPalette="purple"
+                  variant="subtle"
+                  py="0.5"
+                  size={isMobile ? "sm" : "md"}
+                >
                   <Check size={12} />
                   Refinado
                 </Badge>
+              )}
+
+              {prioritization && (
+                <HStack gap="1" flexWrap="wrap">
+                  {prioritization.useMoscow && (
+                    <Badge
+                      size={isMobile ? "sm" : "md"}
+                      colorPalette={
+                        moscowPalette[
+                          prioritization.moscow as keyof typeof moscowPalette
+                        ]
+                      }
+                      variant="subtle"
+                      py="0.5"
+                    >
+                      MoSCoW: {moscowLevel}
+                    </Badge>
+                  )}
+                  {prioritization.useCsd && (
+                    <Badge
+                      size={isMobile ? "sm" : "md"}
+                      colorPalette={
+                        csdPalette[
+                          prioritization.csd as keyof typeof csdPalette
+                        ]
+                      }
+                      variant="subtle"
+                      py="0.5"
+                    >
+                      CSD: {csdLevel}
+                    </Badge>
+                  )}
+                  {prioritization.useGut && (
+                    <Badge
+                      size={isMobile ? "sm" : "md"}
+                      colorPalette="yellow"
+                      variant="subtle"
+                      py="0.5"
+                    >
+                      GUT: {gutScore}{" "}
+                      {`${
+                        !isMobile
+                          ? (gutScore as number) > 1
+                            ? "pontos"
+                            : "ponto"
+                          : (gutScore as number) > 1
+                          ? "Pts"
+                          : "Pt"
+                      }`}
+                    </Badge>
+                  )}
+                </HStack>
               )}
               <Card.Title fontSize={{ base: "sm", sm: "md" }}>
                 {story.title}
@@ -213,6 +310,7 @@ function StoryList({ story, isMobile, shouldRefetch }: StoryProps) {
         storyId={story.id}
         isOpen={isOpenPriority}
         onClose={onClosePriority}
+        shouldRefetch={shouldRefetch}
       />
     </GridItem>
   );
@@ -223,8 +321,15 @@ export default function BacklogPage() {
   const params = useParams();
   const boardId = params.id as string;
 
-  const { stories, isLoading, isFetching, error, refetch, moveStoryToGroup } =
-    useStories(boardId);
+  const {
+    stories,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+    moveStoryToGroup,
+    reorderStory,
+  } = useStories(boardId);
   const {
     storyGroups,
     isLoading: isLoadingGroups,
@@ -254,6 +359,35 @@ export default function BacklogPage() {
     return stories.filter((s) => s.story_group_id === groupId);
   }
 
+  async function handleDropOnStory(
+    e: DragEvent<HTMLDivElement>,
+    targetStoryId: string
+  ) {
+    e.preventDefault();
+    const draggedStoryId = e.dataTransfer.getData("text/plain");
+    if (!draggedStoryId || draggedStoryId === targetStoryId) return;
+
+    const dragged = stories.find((s) => s.id === draggedStoryId);
+    const target = stories.find((s) => s.id === targetStoryId);
+    if (!dragged || !target) return;
+
+    try {
+      if (dragged.story_group_id !== target.story_group_id) {
+        await moveStoryToGroup(draggedStoryId, target.story_group_id ?? null);
+      } else {
+        await reorderStory(draggedStoryId, targetStoryId);
+      }
+      if (target.story_group_id) {
+        await updateStoryGroup({
+          groupId: target.story_group_id,
+          updates: { order_by_stories: "CUSTOM" },
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao mover história:", err);
+    }
+  }
+
   async function handleDropOnGroup(
     e: DragEvent<HTMLDivElement>,
     groupId: string | null
@@ -264,6 +398,13 @@ export default function BacklogPage() {
 
     try {
       await moveStoryToGroup(storyId, groupId);
+
+      if (groupId) {
+        await updateStoryGroup({
+          groupId,
+          updates: { order_by_stories: "CUSTOM" },
+        });
+      }
     } catch (err) {
       console.error("Erro ao mover história para grupo:", err);
     }
@@ -481,7 +622,10 @@ export default function BacklogPage() {
             ) : (
               <Stack gap="6" mt="2">
                 {storyGroups.map((group) => {
-                  const groupStories = storiesByGroupId(group.id);
+                  const groupStories = sortStoriesForGroup(
+                    storiesByGroupId(group.id),
+                    group
+                  );
 
                   return (
                     <Card.Root
@@ -498,7 +642,7 @@ export default function BacklogPage() {
                         borderColor={{ base: "gray.100", _dark: "gray.800" }}
                       >
                         <HStack justify="space-between" w="100%">
-                          <HStack gap="2" justify="center">
+                          <HStack gap="2" alignItems="center">
                             <Box
                               w="10px"
                               h="10px"
@@ -515,12 +659,14 @@ export default function BacklogPage() {
                             >
                               {group.title}
                             </Text>
-                            <Text
-                              fontSize="sm"
-                              color={{ base: "gray.500", _dark: "gray.500" }}
-                            >
-                              {groupStories.length} histórias
-                            </Text>
+                            {!isMobile && (
+                              <Text
+                                fontSize="sm"
+                                color={{ base: "gray.500", _dark: "gray.500" }}
+                              >
+                                {groupStories.length} histórias
+                              </Text>
+                            )}
                             <StoryGroupSettings
                               storyGroupId={group.id}
                               onEdit={() => {
@@ -536,17 +682,28 @@ export default function BacklogPage() {
                               onMoveDown={() => handleMoveGroupDown(group.id)}
                             />
                           </HStack>
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            onClick={() => {
-                              setCreatingStoryGroupId(group.id);
-                              setIsCreatingStory(true);
-                            }}
-                          >
-                            <Plus size={14} />
-                            História
-                          </Button>
+                          <HStack>
+                            <StoryGroupFilter
+                              group={group}
+                              onChangeOrder={async (order) => {
+                                await updateStoryGroup({
+                                  groupId: group.id,
+                                  updates: { order_by_stories: order },
+                                });
+                              }}
+                            />
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              onClick={() => {
+                                setCreatingStoryGroupId(group.id);
+                                setIsCreatingStory(true);
+                              }}
+                            >
+                              <Plus size={14} />
+                              História
+                            </Button>
+                          </HStack>
                         </HStack>
                       </Card.Header>
                       <Card.Body
@@ -564,13 +721,14 @@ export default function BacklogPage() {
                             história para cá ou crie uma nova.
                           </Text>
                         ) : (
-                          <Grid gap="3">
+                          <Grid gap="4">
                             {groupStories.map((story) => (
                               <StoryList
                                 key={story.id}
                                 story={story}
                                 isMobile={isMobile}
                                 shouldRefetch={() => refetch()}
+                                onDropStory={handleDropOnStory}
                               />
                             ))}
                           </Grid>
@@ -593,13 +751,23 @@ export default function BacklogPage() {
                       borderColor={{ base: "gray.100", _dark: "gray.800" }}
                     >
                       <HStack justify="space-between" w="100%">
-                        <Text
-                          fontSize="sm"
-                          fontWeight="semibold"
-                          color={{ base: "gray.800", _dark: "gray.100" }}
-                        >
-                          Histórias sem grupo
-                        </Text>
+                        <HStack>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={{ base: "gray.800", _dark: "gray.100" }}
+                          >
+                            Histórias sem grupo
+                          </Text>
+                          {!isMobile && (
+                            <Text
+                              fontSize="sm"
+                              color={{ base: "gray.500", _dark: "gray.500" }}
+                            >
+                              {storiesWithoutGroup.length} histórias
+                            </Text>
+                          )}{" "}
+                        </HStack>
                         <Button
                           size="xs"
                           variant="ghost"
@@ -619,13 +787,14 @@ export default function BacklogPage() {
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => handleDropOnGroup(e, null)}
                     >
-                      <Grid gap="3">
+                      <Grid gap="4">
                         {storiesWithoutGroup.map((story) => (
                           <StoryList
                             key={story.id}
                             story={story}
                             isMobile={isMobile}
                             shouldRefetch={() => refetch()}
+                            onDropStory={handleDropOnStory}
                           />
                         ))}
                       </Grid>
