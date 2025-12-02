@@ -1,7 +1,7 @@
 "use client";
 
 import ConfirmAction from "@/components/utils/ConfirmAction";
-import { Menu, Portal, useDisclosure } from "@chakra-ui/react";
+import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react";
 import { Ellipsis, Pencil, Trash, ChevronUp, ChevronDown } from "lucide-react";
 import React from "react";
 
@@ -29,13 +29,23 @@ export default function StoryGroupSettings({
   return (
     <>
       <Menu.Root>
-        <Menu.Trigger asChild>
-          <Ellipsis cursor="pointer" size="18" />
+        <Menu.Trigger asChild mt="0.5">
+          <Button
+            variant="ghost"
+            p="2"
+            borderRadius="full"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Ellipsis cursor="pointer" size="18" />
+          </Button>
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
               <Menu.Item
+                cursor="pointer"
                 value="edit-story-group"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -46,6 +56,7 @@ export default function StoryGroupSettings({
                 Editar grupo
               </Menu.Item>
               <Menu.Item
+                cursor="pointer"
                 value="move-up"
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -63,6 +74,7 @@ export default function StoryGroupSettings({
                 Mover para cima
               </Menu.Item>
               <Menu.Item
+                cursor="pointer"
                 value="move-down"
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -80,6 +92,7 @@ export default function StoryGroupSettings({
                 Mover para baixo
               </Menu.Item>
               <Menu.Item
+                cursor="pointer"
                 value="delete-story-group"
                 onClick={async (e) => {
                   e.stopPropagation();

@@ -30,7 +30,10 @@ export function useStoryGroups(boardId: string) {
   >({
     mutationFn: async (payload) => {
       if (!supabase) throw new Error("Supabase client not available");
-      return storyGroupService.createStoryGroup(supabase, payload);
+      return storyGroupService.createStoryGroup(
+        supabase,
+        payload as StoryGroup
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story-groups", boardId] });
