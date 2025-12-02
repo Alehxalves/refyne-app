@@ -69,7 +69,7 @@ export default function ConfirmAction({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content {...dialogProps}>
+          <Dialog.Content {...dialogProps} onClick={(e) => e.stopPropagation()}>
             <Dialog.Header flexDir="column" {...headerProps}>
               <Dialog.Title {...titleProps}>{title}</Dialog.Title>
               {description && (
