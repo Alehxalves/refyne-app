@@ -1,3 +1,5 @@
+import { CHECK_LIST_TYPE, CSD_LEVEL, MOSCOW_LEVEL } from "./enums";
+
 export interface Board {
   id: string;
   user_id: string;
@@ -39,7 +41,7 @@ export interface StoryGroup {
 export interface CheckList {
   id: string;
   story_id: string;
-  type: string;
+  type: CHECK_LIST_TYPE;
   title: string;
   created_at: string;
   updated_at: string;
@@ -59,15 +61,26 @@ export type CheckListWithItems = CheckList & {
   items: CheckListItem[];
 };
 
-export interface Priority {
+export interface PrioritizationTechnique {
   id: string;
   story_id: string;
-  moscow: "MUST" | "SHOULD" | "COULD" | "WON'T";
-  csd: "CERTAINTIES" | "SUPPOSITIONS" | "DOUBTS";
+  moscow: MOSCOW_LEVEL;
+  csd: CSD_LEVEL;
   gut_g_value: number;
   gut_u_value: number;
   gut_t_value: number;
-  reason: string;
+  useMoscow: boolean;
+  useCsd: boolean;
+  useGut: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JustificationsForPriorization {
+  id: string;
+  priorization_technique_id: string;
+  message: string;
+  avatar?: string;
   created_at: string;
   updated_at: string;
 }
