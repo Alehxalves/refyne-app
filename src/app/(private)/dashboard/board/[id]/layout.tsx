@@ -15,7 +15,7 @@ export default function BoardLayout({
 }>) {
   const router = useRouter();
   const params = useParams();
-  const { board, loadBoard } = useBoard(params.id as string);
+  const { board, refetch } = useBoard(params.id as string);
   const { isLoaded, isSignedIn } = useUser();
 
   const { open, onOpen, onClose } = useDisclosure();
@@ -39,7 +39,7 @@ export default function BoardLayout({
         boardColor={board?.color}
         onEditBoard={onOpen}
       />
-      <UpdateBoard isOpen={open} onClose={onClose} shouldRefetch={loadBoard} />
+      <UpdateBoard isOpen={open} onClose={onClose} shouldRefetch={refetch} />
       <Flex>{children}</Flex>
     </>
   );
