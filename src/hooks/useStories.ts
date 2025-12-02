@@ -26,7 +26,7 @@ export function useStories(boardId: string) {
       title: string;
       description: string;
       story_group_id?: string | null;
-    }) => storyService.createStory(supabase!, storyData),
+    }) => storyService.createStory(supabase!, storyData as Story),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -35,12 +35,31 @@ export function useStories(boardId: string) {
     },
   });
 
+  // 🔹 mover história entre grupos / tirar de grupo
+  const moveStoryToGroupMutation = useMutation({
+    mutationFn: async (params: {
+      storyId: string;
+      story_group_id: string | null;
+    }) =>
+      storyService.updateStory(supabase!, params.storyId, {
+        story_group_id: params.story_group_id,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stories", boardId] });
+    },
+  });
+
+  function moveStoryToGroup(storyId: string, story_group_id: string | null) {
+    return moveStoryToGroupMutation.mutateAsync({ storyId, story_group_id });
+  }
+
   return {
     stories,
     isLoading,
     isFetching,
     error,
     createStory: createStoryMutation.mutateAsync,
+    moveStoryToGroup,
     refetch: () =>
       queryClient.invalidateQueries({ queryKey: ["stories", boardId] }),
   };
