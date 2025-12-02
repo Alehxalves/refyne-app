@@ -1,4 +1,9 @@
-import { CHECK_LIST_TYPE, CSD_LEVEL, MOSCOW_LEVEL } from "./enums";
+import {
+  CHECK_LIST_TYPE,
+  CSD_LEVEL,
+  MOSCOW_LEVEL,
+  ORDER_BY_STORIES,
+} from "./enums";
 
 export interface Board {
   id: string;
@@ -28,12 +33,17 @@ export interface Story {
   updated_at: string;
 }
 
+export type StoryWithPrioritization = Story & {
+  prioritization_technique?: PrioritizationTechnique | null;
+};
+
 export interface StoryGroup {
   id: string;
   board_id: string;
   title: string;
   color?: string;
   sort_order: number;
+  order_by_stories: ORDER_BY_STORIES;
   created_at: string;
   updated_at: string;
 }
