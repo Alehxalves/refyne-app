@@ -23,7 +23,7 @@ import {
   useMediaQuery,
   VStack,
 } from "@chakra-ui/react";
-import { Check, Flag, Gavel, Plus, RefreshCcw } from "lucide-react";
+import { Check, Flag, Gavel, Goal, Plus, RefreshCcw } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { DragEvent, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -47,6 +47,15 @@ interface StoryProps {
   onDropStory?: (e: DragEvent<HTMLDivElement>, storyId: string) => void;
 }
 
+const priorityVariants = {
+  initial: { y: 0, scale: 1 },
+  lift: {
+    y: [-2, -6, -2, 0],
+    scale: [1, 1.1, 1],
+    transition: { duration: 0.35, ease: "easeInOut" },
+  },
+};
+
 function StoryList({
   story,
   isMobile,
@@ -68,6 +77,8 @@ function StoryList({
 
   const [isHammering, setIsHammering] = useState(false);
   const [isRefined, setIsRefined] = useState(false);
+
+  const [isFlagging, setIsFlagging] = useState(false);
 
   const prioritization = story.prioritization_technique;
 
@@ -97,6 +108,11 @@ function StoryList({
   function triggerHammer() {
     setIsHammering(true);
     setTimeout(() => setIsHammering(false), 350);
+  }
+
+  function triggerFlag() {
+    setIsFlagging(true);
+    setTimeout(() => setIsFlagging(false), 350);
   }
 
   return (
@@ -286,16 +302,24 @@ function StoryList({
               px="3"
               onClick={(e) => {
                 e.stopPropagation();
+                triggerFlag();
                 onOpenPriority();
               }}
-              _hover={{
-                borderColor: {
-                  base: "gray.300",
-                  _dark: "gray.600",
-                },
-              }}
             >
-              <Flag size={14} />
+              <motion.span
+                animate={isFlagging ? "lift" : "initial"}
+                variants={{
+                  initial: { y: -1, scale: 1 },
+                  lift: {
+                    y: [-2, -6, -2, 0],
+                    scale: [1, 1.1, 1],
+                    transition: { duration: 0.35, ease: "easeInOut" },
+                  },
+                }}
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                <Goal size={14} />
+              </motion.span>
               {!isMobile && "Priorizar"}
             </Button>
           </HStack>
