@@ -90,8 +90,8 @@ export default function CreateStoryGroup({
 
   return (
     <Dialog.Root
-      key="sg"
-      size="md"
+      key="story-group-create"
+      size={{ base: "sm", md: "lg", lg: "lg" }}
       open={isOpen === true}
       onOpenChange={() => {
         clearErrors();

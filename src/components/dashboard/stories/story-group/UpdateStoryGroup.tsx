@@ -108,7 +108,7 @@ export default function UpdateStoryGroup({
   return (
     <Dialog.Root
       key="sg-edit"
-      size="md"
+      size={{ base: "sm", md: "lg", lg: "lg" }}
       open={isOpen === true}
       onOpenChange={(details) => {
         if (!details.open) {

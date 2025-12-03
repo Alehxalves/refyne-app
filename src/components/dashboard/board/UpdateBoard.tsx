@@ -83,7 +83,12 @@ export default function UpdateBoard({
   ];
 
   return (
-    <Dialog.Root key="md" size="lg" open={isOpen} onOpenChange={onClose}>
+    <Dialog.Root
+      key="board-update"
+      size={{ base: "sm", md: "lg", lg: "lg" }}
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
