@@ -2,20 +2,6 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { StoryGroup } from "../models";
 
 export const storyGroupService = {
-  async getStoryGroupsByBoardId(
-    supabase: SupabaseClient,
-    boardId: string
-  ): Promise<StoryGroup[]> {
-    const { data, error } = await supabase
-      .from("story_groups")
-      .select("*")
-      .eq("board_id", boardId)
-      .order("sort_order", { ascending: true });
-
-    if (error) throw error;
-    return data || [];
-  },
-
   async createStoryGroup(
     supabase: SupabaseClient,
     group: Omit<StoryGroup, "id" | "created_at" | "updated_at" | "sort_order">
@@ -78,5 +64,19 @@ export const storyGroupService = {
       .eq("id", groupId);
 
     if (deleteError) throw deleteError;
+  },
+
+  async getStoryGroupsByBoardId(
+    supabase: SupabaseClient,
+    boardId: string
+  ): Promise<StoryGroup[]> {
+    const { data, error } = await supabase
+      .from("story_groups")
+      .select("*")
+      .eq("board_id", boardId)
+      .order("sort_order", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
   },
 };

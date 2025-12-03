@@ -9,3 +9,5 @@ export type ORDER_BY_STORIES =
   | "PRIORITY"
   | "CREATED_AT"
   | "UPDATED_AT";
+
+export type ORDER_DIRECTION_STORIES = "ASC" | "DESC";

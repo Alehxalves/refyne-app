@@ -254,8 +254,7 @@ function StoryList({
           )}
           <HStack mt="2">
             <Button
-              title="Refinar"
-              variant="ghost"
+              variant="outline"
               size="xs"
               borderRadius="full"
               px="3"
@@ -263,12 +262,6 @@ function StoryList({
                 e.stopPropagation();
                 triggerHammer();
                 onOpenRefine();
-              }}
-              _hover={{
-                borderColor: {
-                  base: "gray.300",
-                  _dark: "gray.600",
-                },
               }}
             >
               <motion.span
@@ -287,7 +280,6 @@ function StoryList({
               {!isMobile && "Refinar"}
             </Button>
             <Button
-              title="Priorizar"
               size="xs"
               borderRadius="full"
               px="3"
@@ -527,8 +519,7 @@ export default function BacklogPage() {
                   sprint.
                 </Text>
               </Box>
-
-              <HStack gap="2">
+              {/* <HStack gap="4">
                 {isRefreshing && (
                   <Spinner
                     size="xs"
@@ -537,6 +528,7 @@ export default function BacklogPage() {
                 )}
 
                 <IconButton
+                  title="Recarregar"
                   aria-label="Recarregar"
                   size="xs"
                   variant="ghost"
@@ -548,26 +540,29 @@ export default function BacklogPage() {
                 >
                   <RefreshCcw size={16} />
                 </IconButton>
-
-                <Button
-                  size="xs"
-                  variant="outline"
-                  onClick={() => setIsCreatingGroup(true)}
-                >
-                  <Plus size={14} />
-                  Grupo
-                </Button>
-                <Button
-                  size="xs"
-                  onClick={() => {
-                    setCreatingStoryGroupId(null);
-                    setIsCreatingStory(true);
-                  }}
-                >
-                  <Plus size={14} />
-                  História
-                </Button>
-              </HStack>
+              </HStack> */}
+            </HStack>
+            <HStack gap="2">
+              <Button
+                borderRadius="full"
+                size="xs"
+                variant="outline"
+                onClick={() => setIsCreatingGroup(true)}
+              >
+                <Plus size={14} />
+                Grupo
+              </Button>
+              <Button
+                borderRadius="full"
+                size="xs"
+                onClick={() => {
+                  setCreatingStoryGroupId(null);
+                  setIsCreatingStory(true);
+                }}
+              >
+                <Plus size={14} />
+                História
+              </Button>
             </HStack>
 
             <VStack
@@ -614,6 +609,7 @@ export default function BacklogPage() {
                   </Text>
                   <HStack justify="center" mt="3" gap="3">
                     <Button
+                      borderRadius="full"
                       size="sm"
                       variant="outline"
                       onClick={() => setIsCreatingGroup(true)}
@@ -622,6 +618,7 @@ export default function BacklogPage() {
                       Criar grupo
                     </Button>
                     <Button
+                      borderRadius="full"
                       size="sm"
                       onClick={() => {
                         setCreatingStoryGroupId(null);
@@ -706,8 +703,21 @@ export default function BacklogPage() {
                                   updates: { order_by_stories: order },
                                 });
                               }}
+                              onChangeOrderDirection={async () => {
+                                const newDirection =
+                                  group?.order_direction_stories === "ASC"
+                                    ? "DESC"
+                                    : "ASC";
+                                await updateStoryGroup({
+                                  groupId: group.id,
+                                  updates: {
+                                    order_direction_stories: newDirection,
+                                  },
+                                });
+                              }}
                             />
                             <Button
+                              borderRadius="full"
                               size="xs"
                               variant="ghost"
                               onClick={() => {
@@ -784,6 +794,7 @@ export default function BacklogPage() {
                           )}{" "}
                         </HStack>
                         <Button
+                          borderRadius="full"
                           size="xs"
                           variant="ghost"
                           onClick={() => {
