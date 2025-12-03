@@ -150,7 +150,7 @@ export default function UpdateBoard({
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

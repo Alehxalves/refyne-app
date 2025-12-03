@@ -2,7 +2,7 @@
 
 import { StoryGroup } from "@/lib/supabase/models";
 import { Button, Menu, Portal, Text } from "@chakra-ui/react";
-import { Filter } from "lucide-react";
+import { ArrowUpDown, ListFilter } from "lucide-react";
 import React from "react";
 
 type OrderByStories = "CUSTOM" | "PRIORITY" | "CREATED_AT" | "UPDATED_AT";
@@ -10,6 +10,7 @@ type OrderByStories = "CUSTOM" | "PRIORITY" | "CREATED_AT" | "UPDATED_AT";
 interface StoryGroupFilterProps {
   group: StoryGroup;
   onChangeOrder?: (order: OrderByStories) => Promise<void> | void;
+  onChangeOrderDirection?: () => void;
 }
 
 const LABELS: Record<OrderByStories, string> = {
@@ -22,6 +23,7 @@ const LABELS: Record<OrderByStories, string> = {
 export default function StoryGroupFilter({
   group,
   onChangeOrder,
+  onChangeOrderDirection,
 }: StoryGroupFilterProps) {
   const currentOrder = (group.order_by_stories as OrderByStories) ?? "CUSTOM";
 
@@ -29,6 +31,7 @@ export default function StoryGroupFilter({
     <Menu.Root>
       <Menu.Trigger asChild>
         <Button
+          title="Filtrar"
           variant="ghost"
           p="2"
           borderRadius="full"
@@ -36,10 +39,22 @@ export default function StoryGroupFilter({
             e.stopPropagation();
           }}
         >
-          <Filter size={14} />
+          <ListFilter size={14} />
           <Text fontSize="xs">{LABELS[currentOrder]}</Text>
         </Button>
       </Menu.Trigger>
+      <Button
+        title="Ordenar"
+        variant="ghost"
+        p="2"
+        borderRadius="full"
+        onClick={(e) => {
+          e.stopPropagation();
+          onChangeOrderDirection?.();
+        }}
+      >
+        <ArrowUpDown size={14} />
+      </Button>
       <Portal>
         <Menu.Positioner>
           <Menu.Content>

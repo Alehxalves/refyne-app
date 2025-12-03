@@ -364,7 +364,7 @@ export default function RefineStory({
               </Stack>
             </Dialog.Body>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>
