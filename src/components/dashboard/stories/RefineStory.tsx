@@ -229,6 +229,9 @@ export default function RefineStory({
                           <Checkbox.HiddenInput />
                           <Checkbox.Control
                             bg={item.is_checked ? "green.500" : undefined}
+                            borderColor={
+                              item.is_checked ? "green.500" : undefined
+                            }
                           >
                             <Checkbox.Indicator />
                           </Checkbox.Control>
