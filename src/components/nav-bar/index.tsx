@@ -57,8 +57,14 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
   };
 
   const handleSignOut = async () => {
-    setIsLeaving(true);
-    await signOut();
+    try {
+      setIsLeaving(true);
+      await signOut({ redirectUrl: "/" });
+    } catch (error) {
+      console.error("Erro ao deslogar: ", error);
+    } finally {
+      setIsLeaving(false);
+    }
   };
 
   return (
@@ -155,7 +161,8 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
 
                   {boardTitle && onEditBoard && (
                     <IconButton
-                      aria-label="Editar board"
+                      title="Editar"
+                      aria-label="edit-board"
                       variant="ghost"
                       size="xs"
                       onClick={(e) => {
@@ -191,12 +198,12 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
                   {isNavigating ? (
                     <Spinner size="xs" />
                   ) : (
-                    <MoveRight size={14} />
+                    <MoveRight size={14} style={{ marginRight: 2 }} />
                   )}
                   Dashboard
                 </Button>
                 <IconButton
-                  title="Sair"
+                  borderRadius="full"
                   aria-label="Sair"
                   size="xs"
                   variant="ghost"
