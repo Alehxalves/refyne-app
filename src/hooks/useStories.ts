@@ -5,6 +5,14 @@ import { useUser } from "@clerk/nextjs";
 import { Story, StoryWithPrioritization } from "@/lib/supabase/models";
 
 export function useStories(boardId: string) {
+  return useStoriesBase(boardId, { archived: false });
+}
+
+export function useArchivedStories(boardId: string) {
+  return useStoriesBase(boardId, { archived: true });
+}
+
+function useStoriesBase(boardId: string, { archived }: { archived: boolean }) {
   const { user } = useUser();
   const { supabase } = useSupabase();
   const queryClient = useQueryClient();
@@ -15,9 +23,10 @@ export function useStories(boardId: string) {
     isFetching,
     error,
   } = useQuery<StoryWithPrioritization[]>({
-    queryKey: ["stories", boardId],
+    queryKey: ["stories", boardId, archived ? "archived" : "active"],
     enabled: !!user && !!boardId && !!supabase,
-    queryFn: async () => storyService.getStoriesByBoardId(supabase!, boardId),
+    queryFn: async () =>
+      storyService.getStoriesByBoardId(supabase!, boardId, { archived }),
   });
 
   const createStoryMutation = useMutation({
@@ -30,7 +39,7 @@ export function useStories(boardId: string) {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["stories", boardId],
+        queryKey: ["stories", boardId, archived ? "archived" : "active"],
       });
     },
   });
@@ -44,7 +53,9 @@ export function useStories(boardId: string) {
         story_group_id: params.story_group_id,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stories", boardId] });
+      queryClient.invalidateQueries({
+        queryKey: ["stories", boardId, archived ? "archived" : "active"],
+      });
     },
   });
 
@@ -62,12 +73,20 @@ export function useStories(boardId: string) {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stories", boardId] });
+      queryClient.invalidateQueries({
+        queryKey: ["stories", boardId, archived ? "archived" : "active"],
+      });
     },
   });
 
   function reorderStory(storyId: string, targetStoryId: string) {
     return reorderStoryMutation.mutateAsync({ storyId, targetStoryId });
+  }
+
+  function refetch() {
+    queryClient.invalidateQueries({
+      queryKey: ["stories", boardId, archived ? "archived" : "active"],
+    });
   }
 
   return {
@@ -78,8 +97,7 @@ export function useStories(boardId: string) {
     createStory: createStoryMutation.mutateAsync,
     moveStoryToGroup,
     reorderStory,
-    refetch: () =>
-      queryClient.invalidateQueries({ queryKey: ["stories", boardId] }),
+    refetch,
   };
 }
 
@@ -104,31 +122,11 @@ export function useStory(storyId: string) {
       storyService.updateStory(supabase!, storyId, updates),
 
     onSuccess: (updated) => {
-      queryClient.setQueryData<StoryWithPrioritization | undefined>(
-        ["story", storyId],
-        (old) =>
-          old
-            ? ({
-                ...old,
-                ...updated,
-              } as StoryWithPrioritization)
-            : ({
-                ...updated,
-              } as StoryWithPrioritization)
-      );
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] });
 
-      queryClient.setQueryData<StoryWithPrioritization[] | undefined>(
-        ["stories", updated.board_id],
-        (old) =>
-          old?.map((s) =>
-            s.id === updated.id
-              ? ({
-                  ...s,
-                  ...updated,
-                } as StoryWithPrioritization)
-              : s
-          ) ?? old
-      );
+      queryClient.invalidateQueries({
+        queryKey: ["stories", updated.board_id],
+      });
     },
   });
 
@@ -137,7 +135,20 @@ export function useStory(storyId: string) {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story", storyId] });
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      queryClient.invalidateQueries({
+        queryKey: ["stories"],
+      });
+    },
+  });
+
+  const unarchiveStoryMutation = useMutation({
+    mutationFn: async () => storyService.unarchiveStory(supabase!, storyId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] });
+      queryClient.invalidateQueries({
+        queryKey: ["stories"],
+      });
     },
   });
 
@@ -146,7 +157,9 @@ export function useStory(storyId: string) {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story", storyId] });
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      queryClient.invalidateQueries({
+        queryKey: ["stories"],
+      });
     },
   });
 
@@ -159,6 +172,7 @@ export function useStory(storyId: string) {
     updateStory: updateStoryMutation.mutateAsync,
     isUpdating: updateStoryMutation.isPending,
     archiveStory: archiveStoryMutation.mutateAsync,
+    unarchiveStory: unarchiveStoryMutation.mutateAsync,
     deleteStory: deleteStoryMutation.mutateAsync,
 
     refetch: () =>

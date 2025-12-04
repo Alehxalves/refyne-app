@@ -47,6 +47,48 @@ export const storyGroupService = {
     return data as StoryGroup;
   },
 
+  async archiveStoryGroup(
+    supabase: SupabaseClient,
+    groupId: string
+  ): Promise<void> {
+    const now = new Date().toISOString();
+
+    const { error: groupError } = await supabase
+      .from("story_groups")
+      .update({ archived: true, updated_at: now })
+      .eq("id", groupId);
+
+    if (groupError) throw groupError;
+
+    const { error: storiesError } = await supabase
+      .from("stories")
+      .update({ archived: true, updated_at: now })
+      .eq("story_group_id", groupId);
+
+    if (storiesError) throw storiesError;
+  },
+
+  async unarchiveStoryGroup(
+    supabase: SupabaseClient,
+    groupId: string
+  ): Promise<void> {
+    const now = new Date().toISOString();
+
+    const { error: groupError } = await supabase
+      .from("story_groups")
+      .update({ archived: false, updated_at: now })
+      .eq("id", groupId);
+
+    if (groupError) throw groupError;
+
+    const { error: storiesError } = await supabase
+      .from("stories")
+      .update({ archived: false, updated_at: now })
+      .eq("story_group_id", groupId);
+
+    if (storiesError) throw storiesError;
+  },
+
   async deleteStoryGroup(
     supabase: SupabaseClient,
     groupId: string
@@ -68,14 +110,22 @@ export const storyGroupService = {
 
   async getStoryGroupsByBoardId(
     supabase: SupabaseClient,
-    boardId: string
+    boardId: string,
+    options?: { archived?: boolean }
   ): Promise<StoryGroup[]> {
-    const { data, error } = await supabase
+    const { archived } = options ?? {};
+
+    let query = supabase
       .from("story_groups")
       .select("*")
       .eq("board_id", boardId)
       .order("sort_order", { ascending: true });
 
+    if (archived !== undefined) {
+      query = query.eq("archived", archived);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   },

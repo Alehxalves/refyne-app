@@ -46,6 +46,7 @@ export interface StoryGroup {
   sort_order: number;
   order_by_stories: ORDER_BY_STORIES;
   order_direction_stories: ORDER_DIRECTION_STORIES;
+  archived?: boolean;
   created_at: string;
   updated_at: string;
 }
