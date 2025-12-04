@@ -352,7 +352,14 @@ export default function DashboardPage() {
                               )
                             }
                           >
-                            <HStack justify="space-between" gap={3} mb="1">
+                            <HStack
+                              justify="space-between"
+                              gap={3}
+                              mb="1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
                               <HStack>
                                 <Box
                                   w="8"

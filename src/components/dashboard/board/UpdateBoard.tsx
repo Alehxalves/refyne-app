@@ -16,20 +16,25 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 interface UpdateBoardProps {
+  boardId?: string;
   isOpen: boolean;
   onClose: () => void;
   shouldRefetch?: (value: boolean) => void;
 }
 
 export default function UpdateBoard({
+  boardId,
   isOpen,
   onClose,
   shouldRefetch,
 }: UpdateBoardProps) {
   const params = useParams();
-  const { board, updateBoard, isLoading } = useBoard(params.id as string);
+  const { board, updateBoard, isLoading } = useBoard(
+    boardId || (params.id as string)
+  );
 
   const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [newColor, setNewColor] = useState("");
 
   const [isUpdateing, setIsUpdating] = useState(false);
@@ -37,6 +42,7 @@ export default function UpdateBoard({
   useEffect(() => {
     if (isOpen && board) {
       setNewTitle(board.title || "");
+      setNewDescription(board.description || "");
       setNewColor(board.color || "");
     }
   }, [isOpen, board]);
@@ -50,6 +56,7 @@ export default function UpdateBoard({
     try {
       await updateBoard({
         title: newTitle.trim(),
+        description: newDescription.trim(),
         color: newColor || board.color,
       });
       shouldRefetch?.(true);
@@ -87,12 +94,12 @@ export default function UpdateBoard({
       key="board-update"
       size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={(details) => !details.open && onClose()}
     >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content>
+          <Dialog.Content onClick={(e) => e.stopPropagation()}>
             <Dialog.Header>
               <Dialog.Title>Editar Quadro</Dialog.Title>
             </Dialog.Header>
@@ -108,6 +115,18 @@ export default function UpdateBoard({
                       borderRadius="lg"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
+                      required
+                    />
+                  </Box>
+                  <Box spaceY="2">
+                    <Text>Descrição do Quadro</Text>
+                    <Input
+                      name="board_description"
+                      w="300px"
+                      placeholder="Descrição do quadro..."
+                      borderRadius="lg"
+                      value={newDescription}
+                      onChange={(e) => setNewDescription(e.target.value)}
                       required
                     />
                   </Box>
