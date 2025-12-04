@@ -40,7 +40,16 @@ export default function StoryGroupFilter({
           }}
         >
           <ListFilter size={14} />
-          <Text fontSize="xs">{LABELS[currentOrder]}</Text>
+          <Text
+            fontSize="xs"
+            display={{
+              base: "none",
+              md: "inline-block",
+              lg: "inline-block",
+            }}
+          >
+            {LABELS[currentOrder]}
+          </Text>
         </Button>
       </Menu.Trigger>
       <Button
