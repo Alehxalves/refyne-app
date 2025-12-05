@@ -146,6 +146,7 @@ export default function CreateStory({
                           placeholder="Insira a sua história de usuário aqui..."
                           value={field.value}
                           onChange={(e) => field.onChange(e.target.value)}
+                          maxLength={500}
                         />
                       )}
                     />
