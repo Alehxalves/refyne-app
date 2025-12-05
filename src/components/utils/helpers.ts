@@ -4,7 +4,6 @@ function calculatePriorityScore(story: StoryWithPrioritization): number {
   const p = story.prioritization_technique;
   if (!p) return 0;
 
-  // MoSCoW
   const moscowWeight: Record<string, number> = {
     MUST: 4,
     SHOULD: 3,
@@ -12,7 +11,6 @@ function calculatePriorityScore(story: StoryWithPrioritization): number {
     WONT: 1,
   };
 
-  // CSD
   const csdWeight: Record<string, number> = {
     CERTAINTIES: 3,
     SUPPOSITIONS: 2,
@@ -45,8 +43,12 @@ export function sortStoriesForGroup(
     (group?.order_by_stories as
       | "CUSTOM"
       | "PRIORITY"
+      | "STORY_POINTS"
       | "CREATED_AT"
       | "UPDATED_AT") ?? "CUSTOM";
+
+  const direction = (group?.order_direction_stories as "ASC" | "DESC") ?? "ASC";
+  const dir = direction === "DESC" ? -1 : 1;
 
   const arr = [...stories];
 
@@ -54,27 +56,43 @@ export function sortStoriesForGroup(
     return arr.sort((a, b) => {
       const pa = calculatePriorityScore(a);
       const pb = calculatePriorityScore(b);
-      if (pb !== pa) return pb - pa; // maior prioridade primeiro
 
-      // desempate por sort_order
-      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+      const cmpScore = pb - pa;
+      if (cmpScore !== 0) return dir * cmpScore;
+
+      const cmpSortOrder = (a.sort_order ?? 0) - (b.sort_order ?? 0);
+      return dir * cmpSortOrder;
+    });
+  }
+
+  if (order === "STORY_POINTS") {
+    return arr.sort((a, b) => {
+      const spa = a.story_points ?? 0;
+      const spb = b.story_points ?? 0;
+      const cmpStoryPoints = spb - spa;
+      if (cmpStoryPoints !== 0) return dir * cmpStoryPoints;
+
+      const cmpSortOrder = (a.sort_order ?? 0) - (b.sort_order ?? 0);
+      return dir * cmpSortOrder;
     });
   }
 
   if (order === "CREATED_AT") {
     return arr.sort(
       (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        dir *
+        (new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     );
   }
 
   if (order === "UPDATED_AT") {
     return arr.sort(
       (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        dir *
+        (new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime())
     );
   }
 
-  // CUSTOM (padrão) => sort_order
-  return arr.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  // CUSTOM
+  return arr.sort((a, b) => dir * ((a.sort_order ?? 0) - (b.sort_order ?? 0)));
 }

@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useParams } from "next/navigation";
 import { useStoryGroups } from "@/hooks/useStoryGroups";
+import { EmojiPickerDialog } from "@/components/utils/EmojiPickerDialog";
 
 const StoryGroupSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
@@ -90,8 +91,8 @@ export default function CreateStoryGroup({
 
   return (
     <Dialog.Root
-      key="sg"
-      size="md"
+      key="story-group-create"
+      size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen === true}
       onOpenChange={() => {
         clearErrors();
@@ -118,11 +119,21 @@ export default function CreateStoryGroup({
                       control={control}
                       name="title"
                       render={({ field }) => (
-                        <Input
-                          placeholder="Ex: Cadastro, Relatórios, Financeiro..."
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                        />
+                        <HStack align="center" gap="2">
+                          <Input
+                            w={{ base: "300px", md: "600px" }}
+                            placeholder="Ex: Cadastro, Relatórios, Financeiro..."
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+
+                          <EmojiPickerDialog
+                            key="sg-create-emoji-picker"
+                            onSelectEmoji={(emoji) => {
+                              field.onChange((field.value || "") + emoji);
+                            }}
+                          />
+                        </HStack>
                       )}
                     />
                     <Field.ErrorText>{errors.title?.message}</Field.ErrorText>

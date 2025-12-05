@@ -1,7 +1,8 @@
+import { useColorMode } from "@/components/ui/color-mode";
 import ConfirmAction from "@/components/utils/ConfirmAction";
 import { useStory } from "@/hooks/useStories";
 import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react";
-import { Archive, Ellipsis, Trash } from "lucide-react";
+import { Archive, ArchiveRestore, Ellipsis, Trash } from "lucide-react";
 import React from "react";
 
 interface StorySettingsProps {
@@ -13,7 +14,11 @@ export default function StorySettings({
   storyId,
   shouldRefetch,
 }: StorySettingsProps) {
-  const { archiveStory, deleteStory } = useStory(storyId);
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+
+  const { story, archiveStory, unarchiveStory, deleteStory } =
+    useStory(storyId);
 
   const {
     open: isConfirmDeleteOpen,
@@ -39,23 +44,46 @@ export default function StorySettings({
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
-              {/* <Menu.Item
-                value="archive-story"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    if (storyId) {
-                      await archiveStory();
-                      shouldRefetch?.(true);
+              {story && story.archived ? (
+                <Menu.Item
+                  value="unarchive-story"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      if (storyId) {
+                        await unarchiveStory();
+                        shouldRefetch?.(true);
+                      }
+                    } catch (error) {
+                      console.error("Erro ao desarquivar a história:", error);
                     }
-                  } catch (error) {
-                    console.error("Erro ao arquivar a história:", error);
-                  }
-                }}
-              >
-                <Archive size="14" color="#18181B" />
-                Arquivar
-              </Menu.Item> */}
+                  }}
+                >
+                  <ArchiveRestore
+                    size="14"
+                    color={isDark ? "#FAFAFA" : "#18181B"}
+                  />
+                  Desarquivar
+                </Menu.Item>
+              ) : (
+                <Menu.Item
+                  value="archive-story"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      if (storyId) {
+                        await archiveStory();
+                        shouldRefetch?.(true);
+                      }
+                    } catch (error) {
+                      console.error("Erro ao arquivar a história:", error);
+                    }
+                  }}
+                >
+                  <Archive size="14" color={isDark ? "#FAFAFA" : "#18181B"} />
+                  Arquivar
+                </Menu.Item>
+              )}
               <Menu.Item
                 cursor="pointer"
                 value="delete-story"

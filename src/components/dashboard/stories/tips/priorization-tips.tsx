@@ -20,12 +20,12 @@ export const moscowTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack maxW="100%">
-            <Lightbulb color="#EAB308" />
+          <HStack gap="1">
+            <Lightbulb color="#EAB308" size="18" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
-              truncate
+              textAlign="left"
             >
               Dica avançada: Como usar MoSCoW para priorizar histórias
             </Text>
@@ -119,12 +119,12 @@ export const csdTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack maxW="100%">
-            <Lightbulb color="#EAB308" />
+          <HStack maxW="100%" gap="1">
+            <Lightbulb color="#EAB308" size="18" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
-              truncate
+              textAlign="left"
             >
               Dica avançada: Usando a Matriz CSD para alinhar entendimento
             </Text>
@@ -221,12 +221,12 @@ export const gutTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack maxW="100%">
-            <Lightbulb color="#EAB308" />
+          <HStack gap="1">
+            <Lightbulb color="#EAB308" size="18" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
-              truncate
+              textAlign="left"
             >
               Dica avançada: Priorizando com a Matriz GUT
             </Text>

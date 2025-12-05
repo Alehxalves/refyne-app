@@ -1,14 +1,17 @@
 "use client";
 
+import { EmojiPickerDialog } from "@/components/utils/EmojiPickerDialog";
 import { useBoard } from "@/hooks/useBoards";
 import {
   Box,
   Button,
   CloseButton,
   Dialog,
+  HStack,
   Input,
   Portal,
   Text,
+  Textarea,
   useToken,
   VStack,
 } from "@chakra-ui/react";
@@ -16,20 +19,25 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 interface UpdateBoardProps {
+  boardId?: string;
   isOpen: boolean;
   onClose: () => void;
   shouldRefetch?: (value: boolean) => void;
 }
 
 export default function UpdateBoard({
+  boardId,
   isOpen,
   onClose,
   shouldRefetch,
 }: UpdateBoardProps) {
   const params = useParams();
-  const { board, updateBoard, isLoading } = useBoard(params.id as string);
+  const { board, updateBoard, isLoading } = useBoard(
+    boardId || (params.id as string)
+  );
 
   const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [newColor, setNewColor] = useState("");
 
   const [isUpdateing, setIsUpdating] = useState(false);
@@ -37,6 +45,7 @@ export default function UpdateBoard({
   useEffect(() => {
     if (isOpen && board) {
       setNewTitle(board.title || "");
+      setNewDescription(board.description || "");
       setNewColor(board.color || "");
     }
   }, [isOpen, board]);
@@ -50,6 +59,7 @@ export default function UpdateBoard({
     try {
       await updateBoard({
         title: newTitle.trim(),
+        description: newDescription.trim(),
         color: newColor || board.color,
       });
       shouldRefetch?.(true);
@@ -83,11 +93,16 @@ export default function UpdateBoard({
   ];
 
   return (
-    <Dialog.Root key="md" size="lg" open={isOpen} onOpenChange={onClose}>
+    <Dialog.Root
+      key="board-update"
+      size={{ base: "sm", md: "lg", lg: "xl" }}
+      open={isOpen}
+      onOpenChange={(details) => !details.open && onClose()}
+    >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content>
+          <Dialog.Content onClick={(e) => e.stopPropagation()}>
             <Dialog.Header>
               <Dialog.Title>Editar Quadro</Dialog.Title>
             </Dialog.Header>
@@ -96,13 +111,33 @@ export default function UpdateBoard({
                 <VStack align="left" gap="4">
                   <Box spaceY="2">
                     <Text>Nome do Quadro</Text>
-                    <Input
-                      name="board_title"
-                      w="300px"
-                      placeholder="Novo quadro..."
+                    <HStack align="center" gap="2">
+                      <Input
+                        w={{ base: "300px", md: "600px" }}
+                        name="board_title"
+                        placeholder="Novo quadro..."
+                        borderRadius="lg"
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
+                        required
+                      />
+                      <EmojiPickerDialog
+                        key="board-update-emoji-picker"
+                        onSelectEmoji={(emoji) => {
+                          setNewTitle((prev) => prev + emoji);
+                        }}
+                      />
+                    </HStack>
+                  </Box>
+
+                  <Box spaceY="2">
+                    <Text>Descrição do Quadro</Text>
+                    <Textarea
+                      name="board_description"
+                      placeholder="Descrição do quadro..."
                       borderRadius="lg"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
+                      value={newDescription}
+                      onChange={(e) => setNewDescription(e.target.value)}
                       required
                     />
                   </Box>
@@ -145,7 +180,7 @@ export default function UpdateBoard({
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

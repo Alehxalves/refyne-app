@@ -13,12 +13,12 @@ export const goodStoryTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack maxW="100%">
-            <Lightbulb color="#EAB308" />
+          <HStack gap="1">
+            <Lightbulb color="#EAB308" size="18" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
-              truncate
+              textAlign="left"
             >
               Dica rápida: Como escrever histórias de usuário de forma clara
             </Text>

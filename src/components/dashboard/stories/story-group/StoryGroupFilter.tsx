@@ -1,20 +1,21 @@
 "use client";
 
+import { ORDER_BY_STORIES } from "@/lib/supabase/enums";
 import { StoryGroup } from "@/lib/supabase/models";
 import { Button, Menu, Portal, Text } from "@chakra-ui/react";
-import { Filter } from "lucide-react";
+import { ArrowUpDown, ListFilter } from "lucide-react";
 import React from "react";
-
-type OrderByStories = "CUSTOM" | "PRIORITY" | "CREATED_AT" | "UPDATED_AT";
 
 interface StoryGroupFilterProps {
   group: StoryGroup;
-  onChangeOrder?: (order: OrderByStories) => Promise<void> | void;
+  onChangeOrder?: (order: ORDER_BY_STORIES) => Promise<void> | void;
+  onChangeOrderDirection?: () => void;
 }
 
-const LABELS: Record<OrderByStories, string> = {
+const LABELS: Record<ORDER_BY_STORIES, string> = {
   CUSTOM: "Ordem manual",
   PRIORITY: "Prioridade",
+  STORY_POINTS: "Pontos da história",
   CREATED_AT: "Data de criação",
   UPDATED_AT: "Última atualização",
 };
@@ -22,13 +23,15 @@ const LABELS: Record<OrderByStories, string> = {
 export default function StoryGroupFilter({
   group,
   onChangeOrder,
+  onChangeOrderDirection,
 }: StoryGroupFilterProps) {
-  const currentOrder = (group.order_by_stories as OrderByStories) ?? "CUSTOM";
+  const currentOrder = (group.order_by_stories as ORDER_BY_STORIES) ?? "CUSTOM";
 
   return (
     <Menu.Root>
       <Menu.Trigger asChild>
         <Button
+          title="Filtrar"
           variant="ghost"
           p="2"
           borderRadius="full"
@@ -36,14 +39,35 @@ export default function StoryGroupFilter({
             e.stopPropagation();
           }}
         >
-          <Filter size={14} />
-          <Text fontSize="xs">{LABELS[currentOrder]}</Text>
+          <ListFilter size={14} />
+          <Text
+            fontSize="xs"
+            display={{
+              base: "none",
+              md: "inline-block",
+              lg: "inline-block",
+            }}
+          >
+            {LABELS[currentOrder]}
+          </Text>
         </Button>
       </Menu.Trigger>
+      <Button
+        title="Ordenar"
+        variant="ghost"
+        p="2"
+        borderRadius="full"
+        onClick={(e) => {
+          e.stopPropagation();
+          onChangeOrderDirection?.();
+        }}
+      >
+        <ArrowUpDown size={14} />
+      </Button>
       <Portal>
         <Menu.Positioner>
           <Menu.Content>
-            {(Object.keys(LABELS) as OrderByStories[]).map((value) => {
+            {(Object.keys(LABELS) as ORDER_BY_STORIES[]).map((value) => {
               const isActive = currentOrder === value;
 
               return (

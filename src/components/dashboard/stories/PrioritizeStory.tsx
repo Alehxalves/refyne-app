@@ -107,7 +107,7 @@ export function PrioritizeStory({
 
   return (
     <Dialog.Root
-      size={{ base: "sm", sm: "lg", md: "xl", lg: "xl" }}
+      size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen}
       onOpenChange={(details) => {
         if (!details.open) {
@@ -383,6 +383,7 @@ export function PrioritizeStory({
                     >
                       <HStack gap="2" align="center">
                         <EmojiPickerDialog
+                          key="prioritize-story-justification-emoji-picker"
                           onSelectEmoji={(emoji) => {
                             setNewReason((prev) =>
                               (prev + emoji).slice(0, MAX_REASON_LENGTH)
@@ -476,7 +477,7 @@ export function PrioritizeStory({
               </Stack>
             </Dialog.Body>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

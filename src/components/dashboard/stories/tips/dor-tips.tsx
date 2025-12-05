@@ -18,11 +18,12 @@ export const investTip = () => {
         alignItems="center"
       >
         <Collapsible.Indicator cursor="pointer">
-          <HStack>
-            <Lightbulb color="#EAB308" />
+          <HStack gap="1">
+            <Lightbulb color="#EAB308" size="18" />
             <Text
               fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
               fontWeight="medium"
+              textAlign="left"
             >
               Dica avançada: Refinando histórias de usuário com INVEST
             </Text>

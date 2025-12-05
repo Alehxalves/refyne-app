@@ -352,7 +352,14 @@ export default function DashboardPage() {
                               )
                             }
                           >
-                            <HStack justify="space-between" gap={3} mb="1">
+                            <HStack
+                              justify="space-between"
+                              gap={3}
+                              mb="1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
                               <HStack>
                                 <Box
                                   w="8"
@@ -366,15 +373,22 @@ export default function DashboardPage() {
                                   <Kanban color="white" size={18} />
                                 </Box>
                                 <VStack align="flex-start" gap={0} minW={0}>
-                                  <Text fontWeight="medium" fontSize="sm">
+                                  <Text
+                                    maxW="200px"
+                                    lineClamp={1}
+                                    fontWeight="medium"
+                                    fontSize="sm"
+                                  >
                                     {board.title}
                                   </Text>
                                   {board.description && (
                                     <Text
+                                      maxW="200px"
+                                      lineClamp={1}
                                       fontSize="xs"
                                       color={{
                                         base: "gray.600",
-                                        _dark: "gray.400",
+                                        _dark: "gray.300",
                                       }}
                                     >
                                       {board.description}
@@ -388,7 +402,7 @@ export default function DashboardPage() {
                               <Text
                                 fontWeight="light"
                                 fontSize="xs"
-                                color="gray.500"
+                                color={{ base: "gray.500", _dark: "gray.400" }}
                               >
                                 Criado em{" "}
                                 {format(
@@ -400,7 +414,7 @@ export default function DashboardPage() {
                               <Text
                                 fontWeight="light"
                                 fontSize="xs"
-                                color="gray.500"
+                                color={{ base: "gray.500", _dark: "gray.400" }}
                               >
                                 Atualizado em{" "}
                                 {format(

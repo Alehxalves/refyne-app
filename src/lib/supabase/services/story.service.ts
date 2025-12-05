@@ -90,10 +90,31 @@ export const storyService = {
     if (error) throw error;
     return data;
   },
+
   async archiveStory(supabase: SupabaseClient, storyId: string): Promise<void> {
     const { error } = await supabase
       .from("stories")
-      .update({ archived: true, updated_at: new Date().toISOString() })
+      .update({
+        archived: true,
+        story_group_id: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", storyId);
+
+    if (error) throw error;
+  },
+
+  async unarchiveStory(
+    supabase: SupabaseClient,
+    storyId: string
+  ): Promise<void> {
+    const { error } = await supabase
+      .from("stories")
+      .update({
+        archived: false,
+        story_group_id: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", storyId);
 
     if (error) throw error;
@@ -126,9 +147,12 @@ export const storyService = {
 
   async getStoriesByBoardId(
     supabase: SupabaseClient,
-    boardId: string
+    boardId: string,
+    options?: { archived?: boolean }
   ): Promise<StoryWithPrioritization[]> {
-    const { data, error } = await supabase
+    const { archived = false } = options ?? {};
+
+    let query = supabase
       .from("stories")
       .select(
         `
@@ -137,8 +161,11 @@ export const storyService = {
     `
       )
       .eq("board_id", boardId)
-      .eq("archived", false)
       .order("sort_order", { ascending: true });
+
+    query = query.eq("archived", archived);
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return (data ?? []) as StoryWithPrioritization[];

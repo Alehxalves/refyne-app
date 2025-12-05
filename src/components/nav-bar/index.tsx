@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 import refyneLogo from "@/assets/refyne-logo.png";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { LogOut, MoveRight, SquareKanban, SquarePen } from "lucide-react";
 import { useState } from "react";
@@ -45,6 +45,11 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
 
   const isDashboardPage = pathname === "/dashboard";
   const isBoardPage = pathname.startsWith("/dashboard/board/");
+  const isBacklogPage = pathname.endsWith("backlog");
+  const isArchivedPage = pathname.endsWith("arquivados");
+
+  const params = useParams();
+  const boardId = params.id as string;
 
   const handleGoToDash = () => {
     setIsNavigating(true);
@@ -57,8 +62,14 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
   };
 
   const handleSignOut = async () => {
-    setIsLeaving(true);
-    await signOut();
+    try {
+      setIsLeaving(true);
+      await signOut({ redirectUrl: "/" });
+    } catch (error) {
+      console.error("Erro ao deslogar: ", error);
+    } finally {
+      setIsLeaving(false);
+    }
   };
 
   return (
@@ -116,57 +127,99 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
               </HStack>
             )}
             {isBoardPage && (
-              <HStack gap={2} maxW={{ base: "180px", md: "260px" }}>
+              <HStack
+                gap={2}
+                maxW={{ base: "65vw", md: "30vw" }}
+                flexShrink={1}
+                overflow="hidden"
+              >
                 {!isMobile && (
-                  <Link
-                    href="/dashboard"
-                    fontSize="xs"
-                    color={{ base: "gray.600", _dark: "gray.400" }}
-                  >
-                    <SquareKanban size={14} />
-                    <Text>Boards</Text>
-                  </Link>
+                  <>
+                    <Link
+                      href="/dashboard"
+                      fontSize="xs"
+                      color={{ base: "gray.600", _dark: "gray.400" }}
+                      display="inline-flex"
+                      alignItems="center"
+                      gap={1}
+                    >
+                      <SquareKanban size={14} />
+                      <Text>Boards</Text>
+                    </Link>
+                    <Text fontSize="xs" color="gray.400">
+                      /
+                    </Text>
+                  </>
                 )}
 
-                {!isMobile && (
-                  <Text fontSize="xs" color="gray.400">
-                    /
-                  </Text>
-                )}
-                <HStack gap={2} minW={0}>
-                  <Box
-                    w="8px"
-                    h="8px"
-                    borderRadius="full"
-                    bg={boardColor}
-                    flexShrink={0}
-                  />
-                  {boardTitle ? (
-                    <Text
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color={{ base: "gray.800", _dark: "gray.100" }}
-                    >
-                      {boardTitle}
-                    </Text>
-                  ) : (
-                    <Skeleton height="3" width="120px" />
-                  )}
+                {/* bloco do board */}
+                <HStack gap={2} overflow="hidden" flex="1" minW={0}>
+                  <Link
+                    href={
+                      isBacklogPage
+                        ? undefined
+                        : `/dashboard/board/${boardId}/backlog`
+                    }
+                    style={{ flexGrow: 1 }}
+                    className="chakra-link"
+                  >
+                    <HStack gap={2} overflow="hidden" flex="1" minW={0}>
+                      <Box
+                        w="8px"
+                        h="8px"
+                        borderRadius="full"
+                        bg={boardColor}
+                        flexShrink={0}
+                      />
+                      {boardTitle ? (
+                        <Text
+                          fontSize="sm"
+                          fontWeight="medium"
+                          color={{ base: "gray.800", _dark: "gray.100" }}
+                          truncate
+                          lineClamp={1}
+                          minW={0}
+                        >
+                          {boardTitle}
+                        </Text>
+                      ) : (
+                        <Skeleton height="3" width="120px" />
+                      )}
+                    </HStack>
+                  </Link>
 
                   {boardTitle && onEditBoard && (
                     <IconButton
-                      aria-label="Editar board"
+                      title="Editar"
+                      aria-label="edit-board"
                       variant="ghost"
                       size="xs"
                       onClick={(e) => {
                         e.stopPropagation();
+
+                        e.preventDefault();
                         onEditBoard();
                       }}
+                      flexShrink={0}
                     >
                       <SquarePen size={14} />
                     </IconButton>
                   )}
                 </HStack>
+
+                <Text fontSize="xs" color="gray.400">
+                  /
+                </Text>
+                <Link
+                  fontSize="xs"
+                  href={
+                    isArchivedPage
+                      ? undefined
+                      : `/dashboard/board/${boardId}/arquivados`
+                  }
+                >
+                  Arquivados
+                </Link>
               </HStack>
             )}
           </HStack>
@@ -191,12 +244,12 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
                   {isNavigating ? (
                     <Spinner size="xs" />
                   ) : (
-                    <MoveRight size={14} />
+                    <MoveRight size={14} style={{ marginRight: 2 }} />
                   )}
                   Dashboard
                 </Button>
                 <IconButton
-                  title="Sair"
+                  borderRadius="full"
                   aria-label="Sair"
                   size="xs"
                   variant="ghost"

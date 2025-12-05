@@ -1,8 +1,9 @@
 import ConfirmAction from "@/components/utils/ConfirmAction";
 import { useBoard } from "@/hooks/useBoards";
 import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react";
-import { Ellipsis, Trash } from "lucide-react";
+import { Ellipsis, Pencil, Trash } from "lucide-react";
 import React from "react";
+import UpdateBoard from "./UpdateBoard";
 
 interface BoardSettingsProps {
   boardId: string;
@@ -15,6 +16,11 @@ export default function BoardSettings({
 }: BoardSettingsProps) {
   const { deleteBoard } = useBoard(boardId);
 
+  const {
+    open: isUpdateOpen,
+    onOpen: onOpenUpdate,
+    onClose: onCloseUpdate,
+  } = useDisclosure();
   const {
     open: isConfirmDeleteOpen,
     onOpen: onOpenConfirmDelete,
@@ -39,6 +45,17 @@ export default function BoardSettings({
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
+              <Menu.Item
+                cursor="pointer"
+                value="edit-story-group"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenUpdate();
+                }}
+              >
+                <Pencil size={14} />
+                Editar quadro
+              </Menu.Item>
               <Menu.Item
                 cursor="pointer"
                 value="delete-board"
@@ -66,6 +83,12 @@ export default function BoardSettings({
           await deleteBoard();
           shouldRefetch?.(true);
         }}
+      />
+      <UpdateBoard
+        isOpen={isUpdateOpen}
+        onClose={onCloseUpdate}
+        shouldRefetch={shouldRefetch}
+        boardId={boardId}
       />
     </>
   );

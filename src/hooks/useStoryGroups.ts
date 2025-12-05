@@ -7,6 +7,17 @@ import { StoryGroup } from "@/lib/supabase/models";
 import { storyGroupService } from "@/lib/supabase/services/story-group.service";
 
 export function useStoryGroups(boardId: string) {
+  return useStoryGroupsBase(boardId, { archived: false });
+}
+
+export function useArchivedStoryGroups(boardId: string) {
+  return useStoryGroupsBase(boardId, { archived: true });
+}
+
+function useStoryGroupsBase(
+  boardId: string,
+  { archived }: { archived: boolean }
+) {
   const { supabase } = useSupabase();
   const { user } = useUser();
   const queryClient = useQueryClient();
@@ -17,10 +28,12 @@ export function useStoryGroups(boardId: string) {
     isFetching,
     error,
   } = useQuery<StoryGroup[]>({
-    queryKey: ["story-groups", boardId],
+    queryKey: ["story-groups", boardId, archived ? "archived" : "active"],
     enabled: !!user && !!supabase && !!boardId,
     queryFn: async () =>
-      storyGroupService.getStoryGroupsByBoardId(supabase!, boardId),
+      storyGroupService.getStoryGroupsByBoardId(supabase!, boardId, {
+        archived,
+      }),
   });
 
   const createMutation = useMutation<
@@ -36,7 +49,9 @@ export function useStoryGroups(boardId: string) {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["story-groups", boardId] });
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, archived ? "archived" : "active"],
+      });
     },
   });
 
@@ -50,7 +65,42 @@ export function useStoryGroups(boardId: string) {
       return storyGroupService.updateStoryGroup(supabase, groupId, updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["story-groups", boardId] });
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, archived ? "archived" : "active"],
+      });
+    },
+  });
+
+  const archiveGroupMutation = useMutation<void, Error, string>({
+    mutationFn: async (groupId) => {
+      if (!supabase) throw new Error("Supabase client not available");
+      return storyGroupService.archiveStoryGroup(supabase, groupId);
+    },
+    onSuccess: (_data, groupId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, "active"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, "archived"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["story-group", groupId] });
+    },
+  });
+
+  const unarchiveGroupMutation = useMutation<void, Error, string>({
+    mutationFn: async (groupId) => {
+      if (!supabase) throw new Error("Supabase client not available");
+      return storyGroupService.unarchiveStoryGroup(supabase, groupId);
+    },
+    onSuccess: (_data, groupId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, "active"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, "archived"],
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["story-group", groupId] });
     },
   });
 
@@ -60,19 +110,29 @@ export function useStoryGroups(boardId: string) {
       return storyGroupService.deleteStoryGroup(supabase, groupId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["story-groups", boardId] });
+      queryClient.invalidateQueries({
+        queryKey: ["story-groups", boardId, archived ? "archived" : "active"],
+      });
     },
   });
+
+  function refetch() {
+    queryClient.invalidateQueries({
+      queryKey: ["story-groups", boardId],
+    });
+  }
 
   return {
     storyGroups,
     isLoading,
     isFetching,
     error,
+
     createStoryGroup: createMutation.mutateAsync,
     updateStoryGroup: updateMutation.mutateAsync,
     deleteStoryGroup: deleteMutation.mutateAsync,
-    refetch: () =>
-      queryClient.invalidateQueries({ queryKey: ["story-groups", boardId] }),
+    archiveGroup: archiveGroupMutation.mutateAsync,
+    unarchiveGroup: unarchiveGroupMutation.mutateAsync,
+    refetch,
   };
 }

@@ -17,8 +17,11 @@ import SignIn from "./clerk/SignIn";
 import Image from "next/image";
 import refyneLogo from "@/assets/refyne-logo.png";
 import { Info } from "lucide-react";
+import aiIcon from "@/assets/icons/ai-icon.png";
+import refineIcon from "@/assets/icons/refine-icon.png";
+import priorityIcon from "@/assets/icons/priority-icon.png";
 
-export default function Landing() {
+export default function LandingPage() {
   const { isSignedIn } = useUser();
   const router = useRouter();
 
@@ -199,15 +202,43 @@ export default function Landing() {
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
             <FeatureCard
               title="Refinamento guiado por INVEST"
-              description="Checklist automático para cada história, ajudando o time a garantir independência, valor e testabilidade."
+              description="Checklist INVEST para cada história, ajudando o time a garantir independência, valor e testabilidade."
+              icon={
+                <Image
+                  src={refineIcon}
+                  alt="Ícone de inteligência artificial"
+                  width={82}
+                  height={82}
+                  style={{ borderRadius: 12 }}
+                />
+              }
+            />
+
+            <FeatureCard
+              title="Sugestões inteligentes com IA"
+              description="Use IA para transformar descrições soltas em histórias claras no formato 'Como, eu quero, para', alinhadas ao INVEST."
+              icon={
+                <Image
+                  src={aiIcon}
+                  alt="Ícone de inteligência artificial"
+                  width={82}
+                  height={82}
+                  style={{ borderRadius: 12 }}
+                />
+              }
             />
             <FeatureCard
-              title="Priorização visual"
-              description="MoSCoW, CSD e GUT em uma só tela, para apoiar decisões de roadmap com critérios claros."
-            />
-            <FeatureCard
-              title="Histórico de decisões"
-              description="Comentários ligados a cada história, registrando dúvidas, acordos e mudanças de escopo."
+              title="Priorização visual do backlog"
+              description="Aplique MoSCoW, CSD e GUT em uma só tela para comparar histórias e tomar decisões de roadmap com critérios claros."
+              icon={
+                <Image
+                  src={priorityIcon}
+                  alt="Ícone de inteligência artificial"
+                  width={82}
+                  height={82}
+                  style={{ borderRadius: 12 }}
+                />
+              }
             />
           </SimpleGrid>
         </Box>
@@ -242,9 +273,11 @@ export default function Landing() {
 function FeatureCard({
   title,
   description,
+  icon,
 }: {
   title: string;
   description: string;
+  icon?: React.ReactNode;
 }) {
   return (
     <Box
@@ -252,12 +285,28 @@ function FeatureCard({
       borderWidth="1px"
       borderColor={{ base: "gray.200", _dark: "gray.700" }}
       bg={{ base: "white", _dark: "gray.950" }}
-      p={4}
+      p={6}
+      textAlign="center"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      gap={3}
     >
-      <Text fontSize="sm" fontWeight="semibold" mb={2}>
+      {icon && (
+        <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+          {icon}
+        </Box>
+      )}
+
+      <Text fontSize="sm" fontWeight="semibold">
         {title}
       </Text>
-      <Text fontSize="xs" color={{ base: "gray.600", _dark: "gray.300" }}>
+
+      <Text
+        fontSize="xs"
+        color={{ base: "gray.600", _dark: "gray.300" }}
+        maxW="250px"
+      >
         {description}
       </Text>
     </Box>

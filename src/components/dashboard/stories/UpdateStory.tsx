@@ -83,7 +83,8 @@ export default function UpdateStory({
 
   return (
     <Dialog.Root
-      size="lg"
+      key="update-story-dialog"
+      size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen === true}
       onOpenChange={() => {
         clearErrors();
@@ -211,7 +212,7 @@ export default function UpdateStory({
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

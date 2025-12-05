@@ -18,6 +18,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useParams } from "next/navigation";
 import { useStoryGroups } from "@/hooks/useStoryGroups";
 import { StoryGroup } from "@/lib/supabase/models";
+import { EmojiPickerDialog } from "@/components/utils/EmojiPickerDialog";
 
 const StoryGroupSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
@@ -108,7 +109,7 @@ export default function UpdateStoryGroup({
   return (
     <Dialog.Root
       key="sg-edit"
-      size="md"
+      size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen === true}
       onOpenChange={(details) => {
         if (!details.open) {
@@ -140,11 +141,20 @@ export default function UpdateStoryGroup({
                       control={control}
                       name="title"
                       render={({ field }) => (
-                        <Input
-                          placeholder="Ex: Cadastro, Relatórios, Financeiro..."
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                        />
+                        <HStack align="center" gap="2">
+                          <Input
+                            w={{ base: "300px", md: "600px" }}
+                            placeholder="Ex: Cadastro, Relatórios, Financeiro..."
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          />
+                          <EmojiPickerDialog
+                            key="sg-edit-emoji-picker"
+                            onSelectEmoji={(emoji) => {
+                              field.onChange((field.value || "") + emoji);
+                            }}
+                          />
+                        </HStack>
                       )}
                     />
                     <Field.ErrorText>{errors.title?.message}</Field.ErrorText>
@@ -199,7 +209,7 @@ export default function UpdateStoryGroup({
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

@@ -63,6 +63,8 @@ export default function ConfirmAction({
 
   return (
     <Dialog.Root
+      key="confirm-action-dialog"
+      size={{ base: "sm", md: "lg", lg: "xl" }}
       open={isOpen}
       onOpenChange={(details) => !details.open && onClose()}
     >
@@ -109,7 +111,7 @@ export default function ConfirmAction({
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton borderRadius="full" size="sm" />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

@@ -1,25 +1,43 @@
 "use client";
 
+import { useColorMode } from "@/components/ui/color-mode";
 import ConfirmAction from "@/components/utils/ConfirmAction";
 import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react";
-import { Ellipsis, Pencil, Trash, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Ellipsis,
+  Pencil,
+  Trash,
+  ChevronUp,
+  ChevronDown,
+  Archive,
+  ArchiveRestore,
+} from "lucide-react";
 import React from "react";
 
 interface StoryGroupSettingsProps {
   storyGroupId: string;
-  onDelete?: () => Promise<void> | void;
+  isArchived?: boolean;
   onEdit?: () => void;
   onMoveUp?: () => Promise<void> | void;
   onMoveDown?: () => Promise<void> | void;
+  onArchive?: () => Promise<void> | void;
+  onUnarchive?: () => Promise<void> | void;
+  onDelete?: () => Promise<void> | void;
 }
 
 export default function StoryGroupSettings({
   storyGroupId,
-  onDelete,
+  isArchived,
   onEdit,
   onMoveUp,
   onMoveDown,
+  onArchive,
+  onUnarchive,
+  onDelete,
 }: StoryGroupSettingsProps) {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+
   const {
     open: isConfirmDeleteOpen,
     onOpen: onOpenConfirmDelete,
@@ -44,53 +62,95 @@ export default function StoryGroupSettings({
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
-              <Menu.Item
-                cursor="pointer"
-                value="edit-story-group"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.();
-                }}
-              >
-                <Pencil size={14} />
-                Editar grupo
-              </Menu.Item>
-              <Menu.Item
-                cursor="pointer"
-                value="move-up"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    await onMoveUp?.();
-                  } catch (error) {
-                    console.error(
-                      `Erro ao mover grupo ${storyGroupId} para cima:`,
-                      error
-                    );
-                  }
-                }}
-              >
-                <ChevronUp size={14} />
-                Mover para cima
-              </Menu.Item>
-              <Menu.Item
-                cursor="pointer"
-                value="move-down"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    await onMoveDown?.();
-                  } catch (error) {
-                    console.error(
-                      `Erro ao mover grupo ${storyGroupId} para baixo:`,
-                      error
-                    );
-                  }
-                }}
-              >
-                <ChevronDown size={14} />
-                Mover para baixo
-              </Menu.Item>
+              {isArchived ? (
+                <Menu.Item
+                  value="unarchive-story"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await onUnarchive?.();
+                    } catch (error) {
+                      console.error(
+                        "Erro ao desarquivar o grupo de histórias:",
+                        error
+                      );
+                    }
+                  }}
+                >
+                  <ArchiveRestore
+                    size="14"
+                    color={isDark ? "#FAFAFA" : "#18181B"}
+                  />
+                  Desarquivar
+                </Menu.Item>
+              ) : (
+                <>
+                  <Menu.Item
+                    cursor="pointer"
+                    value="edit-story-group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit?.();
+                    }}
+                  >
+                    <Pencil size={14} />
+                    Editar grupo
+                  </Menu.Item>
+                  <Menu.Item
+                    cursor="pointer"
+                    value="move-up"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await onMoveUp?.();
+                      } catch (error) {
+                        console.error(
+                          `Erro ao mover grupo ${storyGroupId} para cima:`,
+                          error
+                        );
+                      }
+                    }}
+                  >
+                    <ChevronUp size={14} />
+                    Mover para cima
+                  </Menu.Item>
+                  <Menu.Item
+                    cursor="pointer"
+                    value="move-down"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await onMoveDown?.();
+                      } catch (error) {
+                        console.error(
+                          `Erro ao mover grupo ${storyGroupId} para baixo:`,
+                          error
+                        );
+                      }
+                    }}
+                  >
+                    <ChevronDown size={14} />
+                    Mover para baixo
+                  </Menu.Item>
+                  <Menu.Item
+                    value="archive-story"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await onArchive?.();
+                      } catch (error) {
+                        console.error(
+                          "Erro ao arquivar o grupo de histórias:",
+                          error
+                        );
+                      }
+                    }}
+                  >
+                    <Archive size="14" color={isDark ? "#FAFAFA" : "#18181B"} />
+                    Arquivar
+                  </Menu.Item>
+                </>
+              )}
               <Menu.Item
                 cursor="pointer"
                 value="delete-story-group"

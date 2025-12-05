@@ -3,6 +3,7 @@ import {
   CSD_LEVEL,
   MOSCOW_LEVEL,
   ORDER_BY_STORIES,
+  ORDER_DIRECTION_STORIES,
 } from "./enums";
 
 export interface Board {
@@ -27,6 +28,7 @@ export interface Story {
   description: string;
   default_priority?: "LOW" | "MEDIUM" | "HIGH";
   sort_order: number;
+  story_points?: number;
   archived?: boolean;
   story_group_id?: string | null;
   created_at: string;
@@ -44,6 +46,8 @@ export interface StoryGroup {
   color?: string;
   sort_order: number;
   order_by_stories: ORDER_BY_STORIES;
+  order_direction_stories: ORDER_DIRECTION_STORIES;
+  archived?: boolean;
   created_at: string;
   updated_at: string;
 }
