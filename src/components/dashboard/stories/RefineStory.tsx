@@ -248,7 +248,7 @@ export default function RefineStory({
                     >
                       Descrição
                     </Field.Label>
-                    <Button
+                    {/* <Button
                       title="Refinamento com IA"
                       variant="ghost"
                       onClick={handleRefineWithAI}
@@ -268,7 +268,7 @@ export default function RefineStory({
                       >
                         <RiRobot2Line color="#7B61FF" size={20} />
                       </motion.span>
-                    </Button>
+                    </Button> */}
                   </HStack>
 
                   <Controller

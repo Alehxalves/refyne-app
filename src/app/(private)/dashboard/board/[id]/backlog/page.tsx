@@ -677,98 +677,106 @@ export default function BacklogPage() {
                           bg: { base: "gray.100", _dark: "gray.950" },
                         }}
                       >
-                        <HStack justify="space-between" w="100%">
-                          <HStack gap="2" alignItems="center">
-                            <Box
-                              w="10px"
-                              h="10px"
-                              borderRadius="full"
-                              bg={group.color || "purple.500"}
-                            />
-                            <Text
-                              fontSize="sm"
-                              fontWeight="semibold"
-                              color={{ base: "gray.800", _dark: "gray.100" }}
-                            >
-                              {group.title}
-                            </Text>
-                            {!isMobile && (
+                        <VStack w="100%" gap="0">
+                          <HStack justify="space-between" w="100%">
+                            <HStack gap="2" alignItems="center">
+                              <Box
+                                w="10px"
+                                h="10px"
+                                borderRadius="full"
+                                bg={group.color || "purple.500"}
+                              />
                               <Text
+                                maxWidth={{ base: "100px", md: "500px" }}
+                                truncate
+                                lineClamp={1}
                                 fontSize="sm"
-                                color={{
-                                  base: "gray.500",
-                                  _dark: "gray.500",
-                                }}
+                                fontWeight="semibold"
+                                color={{ base: "gray.800", _dark: "gray.100" }}
                               >
-                                {groupStories.length} histórias
+                                {group.title}
                               </Text>
-                            )}
-                          </HStack>
-                          <HStack
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                            gap="0"
-                          >
-                            <StoryGroupFilter
-                              group={group}
-                              onChangeOrder={async (order) => {
-                                await updateStoryGroup({
-                                  groupId: group.id,
-                                  updates: { order_by_stories: order },
-                                });
-                              }}
-                              onChangeOrderDirection={async () => {
-                                const newDirection =
-                                  group?.order_direction_stories === "ASC"
-                                    ? "DESC"
-                                    : "ASC";
-                                await updateStoryGroup({
-                                  groupId: group.id,
-                                  updates: {
-                                    order_direction_stories: newDirection,
-                                  },
-                                });
-                              }}
-                            />
-                            <Button
-                              borderRadius="full"
-                              size="xs"
-                              variant="ghost"
+                            </HStack>
+
+                            <HStack
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCreatingStoryGroupId(group.id);
-                                setIsCreatingStory(true);
+                              }}
+                              gap="0"
+                            >
+                              <StoryGroupFilter
+                                group={group}
+                                onChangeOrder={async (order) => {
+                                  await updateStoryGroup({
+                                    groupId: group.id,
+                                    updates: { order_by_stories: order },
+                                  });
+                                }}
+                                onChangeOrderDirection={async () => {
+                                  const newDirection =
+                                    group?.order_direction_stories === "ASC"
+                                      ? "DESC"
+                                      : "ASC";
+                                  await updateStoryGroup({
+                                    groupId: group.id,
+                                    updates: {
+                                      order_direction_stories: newDirection,
+                                    },
+                                  });
+                                }}
+                              />
+                              <Button
+                                borderRadius="full"
+                                size="xs"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCreatingStoryGroupId(group.id);
+                                  setIsCreatingStory(true);
+                                }}
+                              >
+                                <Plus size={14} />
+                                História
+                              </Button>
+                              <StoryGroupSettings
+                                storyGroupId={group.id}
+                                isArchived={group.archived}
+                                onEdit={() => {
+                                  setEditingGroup(group);
+                                  setIsEditingGroupOpen(true);
+                                }}
+                                onDelete={async () => {
+                                  await deleteStoryGroup(group.id);
+                                  await refetchGroups();
+                                  await refetch();
+                                }}
+                                onMoveUp={() => handleMoveGroupUp(group.id)}
+                                onMoveDown={() => handleMoveGroupDown(group.id)}
+                                onArchive={async () => {
+                                  await archiveGroup(group.id);
+                                  await refetchGroups();
+                                }}
+                                onUnarchive={async () => {
+                                  await unarchiveGroup(group.id);
+                                  await refetchGroups();
+                                }}
+                              />
+                            </HStack>
+                          </HStack>
+                          {!isMobile && (
+                            <Text
+                              w="100%"
+                              textAlign="left"
+                              fontSize="sm"
+                              color={{
+                                base: "gray.500",
+                                _dark: "gray.500",
                               }}
                             >
-                              <Plus size={14} />
-                              História
-                            </Button>
-                            <StoryGroupSettings
-                              storyGroupId={group.id}
-                              isArchived={group.archived}
-                              onEdit={() => {
-                                setEditingGroup(group);
-                                setIsEditingGroupOpen(true);
-                              }}
-                              onDelete={async () => {
-                                await deleteStoryGroup(group.id);
-                                await refetchGroups();
-                                await refetch();
-                              }}
-                              onMoveUp={() => handleMoveGroupUp(group.id)}
-                              onMoveDown={() => handleMoveGroupDown(group.id)}
-                              onArchive={async () => {
-                                await archiveGroup(group.id);
-                                await refetchGroups();
-                              }}
-                              onUnarchive={async () => {
-                                await unarchiveGroup(group.id);
-                                await refetchGroups();
-                              }}
-                            />
-                          </HStack>
-                        </HStack>
+                              {groupStories.length} histórias
+                            </Text>
+                          )}
+                        </VStack>
                       </Accordion.ItemTrigger>
                       <Accordion.ItemContent
                         px="3"
@@ -819,38 +827,42 @@ export default function BacklogPage() {
                         bg: { base: "gray.100", _dark: "gray.950" },
                       }}
                     >
-                      <HStack justify="space-between" w="100%">
-                        <HStack>
-                          <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={{ base: "gray.800", _dark: "gray.100" }}
-                          >
-                            Histórias sem grupo
-                          </Text>
-                          {!isMobile && (
+                      <VStack w="100%" gap="0">
+                        <HStack justify="space-between" w="100%">
+                          <HStack>
                             <Text
                               fontSize="sm"
-                              color={{ base: "gray.500", _dark: "gray.500" }}
+                              fontWeight="semibold"
+                              color={{ base: "gray.800", _dark: "gray.100" }}
                             >
-                              {storiesWithoutGroup.length} histórias
+                              Histórias sem grupo
                             </Text>
-                          )}
+                          </HStack>
+                          <Button
+                            borderRadius="full"
+                            size="xs"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCreatingStoryGroupId(null);
+                              setIsCreatingStory(true);
+                            }}
+                          >
+                            <Plus size={14} />
+                            História
+                          </Button>
                         </HStack>
-                        <Button
-                          borderRadius="full"
-                          size="xs"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCreatingStoryGroupId(null);
-                            setIsCreatingStory(true);
-                          }}
-                        >
-                          <Plus size={14} />
-                          História
-                        </Button>
-                      </HStack>
+                        {!isMobile && (
+                          <Text
+                            w="100%"
+                            textAlign="left"
+                            fontSize="sm"
+                            color={{ base: "gray.500", _dark: "gray.500" }}
+                          >
+                            {storiesWithoutGroup.length} histórias
+                          </Text>
+                        )}
+                      </VStack>
                     </Accordion.ItemTrigger>
                     <Accordion.ItemContent
                       px="3"
