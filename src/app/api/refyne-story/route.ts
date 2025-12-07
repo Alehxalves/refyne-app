@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const MODEL_FALLBACKS = [
   "google/gemma-3-27b-it:free",
-  "openai/gpt-oss-20b:free",
   "amazon/nova-2-lite-v1",
+  "openai/gpt-oss-20b:free",
 ];
 
 export async function POST(req: NextRequest) {
