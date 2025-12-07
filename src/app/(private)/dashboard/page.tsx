@@ -40,15 +40,14 @@ export default function DashboardPage() {
     error,
   } = useBoards();
 
+  const isEmpty = !isLoading && !isFetching && boards.length === 0;
+  const isInitialLoading = (isLoading || isFetching) && boards.length === 0;
+
+  const firstNameOrEmail =
+    user?.firstName ?? user?.emailAddresses[0]?.emailAddress ?? "por aqui";
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
-
-  const handleCreateBoard = async () => {
-    await createBoard({
-      title: "Novo quadro",
-      description: "Descrição do quadro",
-    });
-  };
 
   const recentBoardsCount = useMemo(() => {
     const sevenDaysAgo = new Date();
@@ -66,11 +65,30 @@ export default function DashboardPage() {
     );
   }, [boards, search]);
 
-  const isEmpty = !isLoading && !isFetching && boards.length === 0;
-  const isInitialLoading = (isLoading || isFetching) && boards.length === 0;
+  const handleCreateBoard = async () => {
+    await createBoard({
+      title: "Novo quadro",
+      description: "Descrição do quadro",
+    });
+  };
 
-  const firstNameOrEmail =
-    user?.firstName ?? user?.emailAddresses[0]?.emailAddress ?? "por aqui";
+  const handleCardNavigate = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    boardId: string
+  ) => {
+    try {
+      const url = `/dashboard/board/${boardId}/backlog`;
+
+      if (e.ctrlKey || e.metaKey) {
+        window.open(url, "_blank");
+        return;
+      }
+
+      router.push(url);
+    } catch (error) {
+      console.error("Ocorreu um durante a navegação para o board: ", error);
+    }
+  };
 
   return (
     <>
@@ -346,11 +364,14 @@ export default function DashboardPage() {
                           <Card.Body
                             gap="3"
                             cursor="pointer"
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/board/${board.id}/backlog`
-                              )
-                            }
+                            onClick={(e) => handleCardNavigate(e, board.id)}
+                            onAuxClick={(e) => {
+                              // Botão do meio do mouse (scroll click)
+                              if (e.button === 1) {
+                                const url = `/dashboard/board/${board.id}/backlog`;
+                                window.open(url, "_blank");
+                              }
+                            }}
                           >
                             <HStack
                               justify="space-between"
