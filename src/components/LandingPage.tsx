@@ -203,42 +203,28 @@ export default function LandingPage() {
             <FeatureCard
               title="Refinamento guiado por INVEST"
               description="Checklist INVEST para cada história, ajudando o time a garantir independência, valor e testabilidade."
-              icon={
-                <Image
-                  src={refineIcon}
-                  alt="Ícone de inteligência artificial"
-                  width={82}
-                  height={82}
-                  style={{ borderRadius: 12 }}
-                />
-              }
             />
 
-            <FeatureCard
+            {/* <FeatureCard
               title="Sugestões inteligentes com IA"
               description="Use IA para transformar descrições soltas em histórias claras no formato 'Como, eu quero, para', alinhadas ao INVEST."
               icon={
                 <Image
                   src={aiIcon}
                   alt="Ícone de inteligência artificial"
-                  width={82}
-                  height={82}
+                  width={76}
+                  height={76}
                   style={{ borderRadius: 12 }}
                 />
               }
-            />
+            /> */}
             <FeatureCard
               title="Priorização visual do backlog"
               description="Aplique MoSCoW, CSD e GUT em uma só tela para comparar histórias e tomar decisões de roadmap com critérios claros."
-              icon={
-                <Image
-                  src={priorityIcon}
-                  alt="Ícone de inteligência artificial"
-                  width={82}
-                  height={82}
-                  style={{ borderRadius: 12 }}
-                />
-              }
+            />
+            <FeatureCard
+              title="Histórico de decisões"
+              description="Comentários ligados a cada história, registrando dúvidas, acordos e mudanças de escopo."
             />
           </SimpleGrid>
         </Box>
