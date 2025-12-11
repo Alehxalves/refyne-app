@@ -5,17 +5,12 @@
 <h1 align="center">Refyne</h1>
 
 <p align="center">
-  Desenvolvido por <b>Alex Alves</b> como parte do Trabalho de Conclusão de Curso 
-  em Sistemas de Informação — UFC Quixadá.
-</p>
-
-<p align="center">
   <a href="https://refyne.app" target="_blank"><b>🌐 Acessar o Refyne</b></a>
 </p>
 
 ---
 
-## ✨ Sobre o projeto
+## ✨ Sobre o projeto  
 
 O **Refyne** é uma plataforma criada para ajudar equipes ágeis a escrever e melhorar histórias de usuário com mais clareza, valor e objetividade.
 
@@ -25,7 +20,7 @@ O **Refyne** é uma plataforma criada para ajudar equipes ágeis a escrever e me
 Este software faz parte do TCC:
 
 > **“Desenvolvimento de uma ferramenta para apoio no refinamento de histórias de usuário junto ao time ágil”**,  
-> por **Alex Alves**, graduando em Sistemas de Informação na Universidade Federal do Ceará – Campus Quixadá.
+> por **Alex Alves de Sousa** orientado pela professora **Leonara de Medeiros Braz***, graduando em Sistemas de Informação na Universidade Federal do Ceará – Campus Quixadá.
 
 ---
 ## 👤 Autor
@@ -33,16 +28,7 @@ Este software faz parte do TCC:
 **Alex Alves**  
 Graduando em Sistemas de Informação — UFC Quixadá  
 🔗 LinkedIn: https://linkedin.com/in/seu-perfil  
-📧 Email: seuemail@exemplo.com
-
----
-
-Tema do TCC:
-
-> **Desenvolvimento de uma ferramenta para apoio no refinamento de histórias de usuário junto ao time ágil**  
-> Aplicando práticas como **INVEST**, **Definition of Ready**, **MoSCoW**, **CSD**, **GUT** e coleta de feedback com Product Owners.
-
-O aplicativo Refyne representa o **MVP entregue na fase final do TCC**, validado com POs participantes da primeira etapa da pesquisa.
+📧 Email: alehxalves@gmail.com
 
 ---
 
@@ -73,7 +59,7 @@ O aplicativo Refyne representa o **MVP entregue na fase final do TCC**, validado
 
 ## 🛠️ Tecnologias utilizadas
 
-- **Next.js 14 (App Router)**  
+- **Next.js 15 (App Router)**  
 - **React + Chakra UI**  
 - **Supabase (PostgreSQL + Auth)**  
 - **Clerk (Autenticação)**  
