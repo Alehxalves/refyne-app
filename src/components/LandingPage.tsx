@@ -95,8 +95,7 @@ export default function LandingPage() {
             </HStack>
 
             <Text fontSize="xs" color={{ base: "gray.500", _dark: "gray.400" }}>
-              Nenhum cartão de crédito necessário • Ideal POs e times que querem
-              refinar melhor suas histórias.
+              Ideal POs e times que querem refinar melhor suas histórias.
             </Text>
           </Stack>
           <Box
@@ -133,14 +132,9 @@ export default function LandingPage() {
               <Box
                 borderRadius="lg"
                 p={3}
-                bg={{ base: "purple.50", _dark: "purple.950" }}
+                bg={{ base: "purple.50", _dark: "purple.700" }}
               >
-                <Text
-                  fontSize="xs"
-                  fontWeight="semibold"
-                  mb={2}
-                  color={{ base: "purple.700", _dark: "purple.200" }}
-                >
+                <Text fontSize="xs" fontWeight="semibold" mb={2}>
                   Checklist INVEST
                 </Text>
                 <SimpleGrid columns={2} gap={2} fontSize="xs">
@@ -156,7 +150,7 @@ export default function LandingPage() {
                 <Box
                   borderRadius="lg"
                   p={3}
-                  bg={{ base: "orange.50", _dark: "orange.950" }}
+                  bg={{ base: "green.50", _dark: "green.700" }}
                 >
                   <Text fontSize="xs" fontWeight="semibold" mb={1}>
                     Prioridade
