@@ -27,7 +27,7 @@ Este software faz parte do TCC:
 
 **Alex Alves**  
 Graduando em Sistemas de Informação — UFC Quixadá  
-🔗 LinkedIn: https://linkedin.com/in/seu-perfil  
+🔗 LinkedIn: https://www.linkedin.com/in/alex-alves-5483a0236/ 
 📧 Email: alehxalves@gmail.com
 
 ---
