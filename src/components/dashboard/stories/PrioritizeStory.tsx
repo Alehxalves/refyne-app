@@ -150,7 +150,10 @@ export function PrioritizeStory({
                     }
                   >
                     <Checkbox.HiddenInput />
-                    <Checkbox.Control>
+                    <Checkbox.Control
+                      bg={useMoscow ? "green.500" : "transparent"}
+                      borderColor={useMoscow ? "transparent" : undefined}
+                    >
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                     <Checkbox.Label fontSize="sm">MoSCoW</Checkbox.Label>
@@ -166,7 +169,10 @@ export function PrioritizeStory({
                     }
                   >
                     <Checkbox.HiddenInput />
-                    <Checkbox.Control>
+                    <Checkbox.Control
+                      bg={useCsd ? "green.500" : "transparent"}
+                      borderColor={useCsd ? "transparent" : undefined}
+                    >
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                     <Checkbox.Label fontSize="sm">
@@ -184,7 +190,10 @@ export function PrioritizeStory({
                     }
                   >
                     <Checkbox.HiddenInput />
-                    <Checkbox.Control>
+                    <Checkbox.Control
+                      bg={useGut ? "green.500" : "transparent"}
+                      borderColor={useGut ? "transparent" : undefined}
+                    >
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                     <Checkbox.Label fontSize="sm">

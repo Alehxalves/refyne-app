@@ -28,6 +28,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import BoardSettings from "@/components/dashboard/board/BoardSettings";
 import { useRouter } from "next/navigation";
+import FeedbackFloatingButton from "@/components/feedback/FeedbackFloatingButton";
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -456,6 +457,7 @@ export default function DashboardPage() {
           </>
         )}
       </Container>
+      <FeedbackFloatingButton />
     </>
   );
 }

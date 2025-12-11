@@ -108,3 +108,14 @@ export interface Comment {
   created_at: string;
   updated_at: string;
 }
+
+export interface Feedback {
+  id: string;
+  user_id: string | null;
+  rating: number;
+  liked?: string;
+  improvements?: string;
+  would_recommend?: string;
+  created_at: string;
+  updated_at: string;
+}
