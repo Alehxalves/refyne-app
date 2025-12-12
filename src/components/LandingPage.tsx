@@ -132,7 +132,7 @@ export default function LandingPage() {
               <Box
                 borderRadius="lg"
                 p={3}
-                bg={{ base: "purple.50", _dark: "purple.700" }}
+                bg={{ base: "purple.50", _dark: "purple.900" }}
               >
                 <Text fontSize="xs" fontWeight="semibold" mb={2}>
                   Checklist INVEST
@@ -150,20 +150,14 @@ export default function LandingPage() {
                 <Box
                   borderRadius="lg"
                   p={3}
-                  bg={{ base: "green.50", _dark: "green.700" }}
+                  bg={{ base: "orange.50", _dark: "orange.800" }}
                 >
                   <Text fontSize="xs" fontWeight="semibold" mb={1}>
                     Prioridade
                   </Text>
-                  <Text fontSize="xs">
-                    MoSCoW: <b>Deve ter</b>
-                  </Text>
-                  <Text fontSize="xs">
-                    CSD: <b>Certeza</b>
-                  </Text>
-                  <Text fontSize="xs">
-                    GUT: <b>80 pts</b>
-                  </Text>
+                  <Text fontSize="xs">MoSCoW: Deve ter</Text>
+                  <Text fontSize="xs">CSD: Certeza</Text>
+                  <Text fontSize="xs">GUT: 80 pts</Text>
                 </Box>
                 <Box
                   borderRadius="lg"
@@ -264,7 +258,7 @@ function FeatureCard({
       borderRadius="xl"
       borderWidth="1px"
       borderColor={{ base: "gray.200", _dark: "gray.700" }}
-      bg={{ base: "white", _dark: "gray.950" }}
+      bg={{ base: "white", _dark: "gray.900" }}
       p={6}
       textAlign="center"
       display="flex"
