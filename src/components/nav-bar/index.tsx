@@ -122,7 +122,7 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
                   fontWeight="medium"
                   color={{ base: "gray.700", _dark: "gray.200" }}
                 >
-                  Meus boards
+                  Meus quadros
                 </Text>
               </HStack>
             )}
@@ -144,7 +144,7 @@ export function NavBar({ boardTitle, boardColor, onEditBoard }: NavBarProps) {
                       gap={1}
                     >
                       <SquareKanban size={14} />
-                      <Text>Boards</Text>
+                      <Text>Quadros</Text>
                     </Link>
                     <Text fontSize="xs" color="gray.400">
                       /

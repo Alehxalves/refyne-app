@@ -464,7 +464,7 @@ export function PrioritizeStory({
                                 </Text>
 
                                 <IconButton
-                                  title="Excluir comentário"
+                                  title="Excluir justificativa"
                                   size="xs"
                                   variant="ghost"
                                   aria-label="Excluir justificativa"
