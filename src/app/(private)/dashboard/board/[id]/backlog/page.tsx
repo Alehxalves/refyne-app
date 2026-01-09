@@ -154,7 +154,7 @@ function StoryList({
                   bg="purple.500"
                   variant="subtle"
                   py="0.5"
-                  size={isMobile ? "sm" : "md"}
+                  size={isMobile ? "xs" : "sm"}
                 >
                   <HiStar />
                   Refinada
@@ -165,7 +165,7 @@ function StoryList({
                 <HStack gap="2" flexWrap="wrap">
                   {prioritization.useMoscow && (
                     <Badge
-                      size={isMobile ? "sm" : "md"}
+                      size={isMobile ? "xs" : "sm"}
                       colorPalette={
                         moscowPalette[
                           prioritization.moscow as keyof typeof moscowPalette
@@ -179,7 +179,7 @@ function StoryList({
                   )}
                   {prioritization.useCsd && (
                     <Badge
-                      size={isMobile ? "sm" : "md"}
+                      size={isMobile ? "xs" : "sm"}
                       colorPalette={
                         csdPalette[
                           prioritization.csd as keyof typeof csdPalette
@@ -193,7 +193,7 @@ function StoryList({
                   )}
                   {prioritization.useGut && (
                     <Badge
-                      size={isMobile ? "sm" : "md"}
+                      size={isMobile ? "xs" : "sm"}
                       colorPalette="pink"
                       variant="subtle"
                       py="0.5"
@@ -212,7 +212,7 @@ function StoryList({
                   )}
                 </HStack>
               )}
-              <Card.Title fontSize={{ base: "sm", sm: "md" }}>
+              <Card.Title fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
                 {story.title}
               </Card.Title>
               <Card.Description
