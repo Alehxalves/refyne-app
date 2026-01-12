@@ -59,7 +59,7 @@ export default function LandingPage() {
               bg={{ base: "purple.100", _dark: "purple.900" }}
               color={{ base: "purple.700", _dark: "purple.200" }}
             >
-              Focado em Product Owners & times ágeis
+              Foco em refinamento & priorização
             </Badge>
 
             <Heading
@@ -95,7 +95,7 @@ export default function LandingPage() {
             </HStack>
 
             <Text fontSize="xs" color={{ base: "gray.500", _dark: "gray.400" }}>
-              Ideal POs e times que querem refinar melhor suas histórias.
+              Indicado para quem buscam aprimorar o refinamento e a priorização de histórias de usuário.
             </Text>
           </Stack>
           <Box
