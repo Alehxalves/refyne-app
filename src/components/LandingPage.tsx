@@ -80,9 +80,9 @@ export default function LandingPage() {
               priorizar o backlog com técnicas como MoSCoW, CSD e GUT – tudo em
               um fluxo simples e visual.
             </Text>
-            {isMobile && (
-              <HStack gap={3} flexWrap="wrap">
-                {startNow()}
+            <HStack gap={3} flexWrap="wrap">
+              {startNow()}
+              {isMobile && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -94,8 +94,8 @@ export default function LandingPage() {
                   <Info size={16} />
                   Ver como funciona
                 </Button>
-              </HStack>
-            )}
+              )}
+            </HStack>
             <Text fontSize="xs" color={{ base: "gray.500", _dark: "gray.400" }}>
               Indicado para quem buscam aprimorar o refinamento e a priorização de histórias de usuário.
             </Text>
