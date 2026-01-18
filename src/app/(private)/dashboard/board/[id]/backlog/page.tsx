@@ -40,6 +40,8 @@ import StoryGroupFilter from "@/components/dashboard/stories/story-group/StoryGr
 import { HiStar } from "react-icons/hi";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import ConclusionsFutureStepperModal from "@/components/conclusoes-tcc/ConclusionsFutureStepperModal";
+import { useUser } from "@clerk/nextjs";
 
 interface StoryProps {
   story: StoryWithPrioritization;
@@ -205,8 +207,8 @@ function StoryList({
                             ? "pontos"
                             : "ponto"
                           : (gutScore as number) > 1
-                          ? "Pts"
-                          : "Pt"
+                            ? "Pts"
+                            : "Pt"
                       }`}
                     </Badge>
                   )}
@@ -263,7 +265,7 @@ function StoryList({
               {checkLists.map((cl) => {
                 const totalItems = cl.items.length;
                 const completedItems = cl.items.filter(
-                  (item) => item.is_checked
+                  (item) => item.is_checked,
                 ).length;
                 const progress =
                   totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
@@ -367,6 +369,7 @@ function StoryList({
 }
 
 export default function BacklogPage() {
+  const { user } = useUser();
   const [isMobile] = useMediaQuery(["(max-width: 400px)"]);
   const params = useParams();
   const boardId = params.id as string;
@@ -396,7 +399,7 @@ export default function BacklogPage() {
 
   const storiesWithoutGroup = useMemo(
     () => stories.filter((s) => !s.story_group_id),
-    [stories]
+    [stories],
   );
 
   function storiesByGroupId(groupId: string) {
@@ -405,7 +408,7 @@ export default function BacklogPage() {
 
   async function handleDropOnStory(
     e: DragEvent<HTMLDivElement>,
-    targetStoryId: string
+    targetStoryId: string,
   ) {
     e.preventDefault();
     const draggedStoryId = e.dataTransfer.getData("text/plain");
@@ -434,7 +437,7 @@ export default function BacklogPage() {
 
   async function handleDropOnGroup(
     e: DragEvent<HTMLDivElement>,
-    groupId: string | null
+    groupId: string | null,
   ) {
     e.preventDefault();
     const storyId = e.dataTransfer.getData("text/plain");
@@ -656,7 +659,7 @@ export default function BacklogPage() {
                 {storyGroups.map((group) => {
                   const groupStories = sortStoriesForGroup(
                     storiesByGroupId(group.id),
-                    group
+                    group,
                   );
 
                   return (
@@ -903,6 +906,9 @@ export default function BacklogPage() {
           </>
         )}
       </Box>
+      {user?.id === "user_34yRuqlgzyoAZIVJcIOvowbOoFb" && (
+        <ConclusionsFutureStepperModal />
+      )}
     </Container>
   );
 }
