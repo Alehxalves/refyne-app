@@ -47,7 +47,7 @@ export default function LandingPage() {
 
   return (
     <Box as="main" flex="1">
-      <Container maxW="6xl" px={{ base: 4, md: 6 }} py={10}>
+      <Container maxW="6xl" px={{ base: 4, md: 6 }} py={6}>
         <SimpleGrid columns={{ base: 1, md: 2 }} gap={10} alignItems="center">
           <Stack gap={4}>
             <Badge
@@ -176,7 +176,7 @@ export default function LandingPage() {
             </Stack>
           </Box>
         </SimpleGrid>
-        <Box id="como-funciona" mt={12}>
+        <Box id="como-funciona" mt={10}>
           <Stack gap={2} mb={6} textAlign="center">
             <Heading as="h2" size="md">
               Por que usar o Refyne?
@@ -216,7 +216,7 @@ export default function LandingPage() {
             />
           </SimpleGrid>
         </Box>
-        <Box mt={12}>
+        <Box mt={10}>
           <Flex
             borderRadius="2xl"
             p={{ base: 4, md: 6 }}
