@@ -45,7 +45,7 @@ const steps = [
     title: "Encerramento",
     content: (
       <Text fontSize="sm" color="gray.700">
-        Obrigado pela atenção!
+        Obrigado pela atenção! Dúvidas?
       </Text>
     ),
   },
@@ -81,7 +81,7 @@ export function ConclusionsFutureSteps() {
             <Dialog.Content>
               <Dialog.Header>
                 <Dialog.Title fontSize="sm">
-                  CONCLUSÕES E TRABALHOS FUTUROS 14/14
+                  CONCLUSÕES E TRABALHOS FUTUROS 15/15
                 </Dialog.Title>
                 <Dialog.CloseTrigger />
               </Dialog.Header>
